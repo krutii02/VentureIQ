@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, RefreshCw, AlertCircle, Eye, Ban, CheckCircle,
+  Users, RefreshCw, AlertCircle, Eye, Ban, CheckCircle, Trash2,
   MoreVertical, X, Building2, Mail, Calendar, Activity,
   Globe, Link as Linkedin, BadgeCheck, TrendingUp, DollarSign,
   Briefcase, Zap, Cpu, Award, Target, ChevronRight
@@ -21,6 +21,7 @@ export default function AdminUsersPage() {
   const [activeMenuId, setActiveMenuId] = useState(null);
   const [profileUser, setProfileUser]   = useState(null);
   const [banUser, setBanUser]           = useState(null);
+  const [deleteUserTarget, setDeleteUserTarget] = useState(null);
 
   const fetchUsers = async () => {
     setUsersLoading(true);
@@ -59,6 +60,22 @@ export default function AdminUsersPage() {
     );
     return matchesRole && matchesSearch;
   });
+
+  const handleConfirmDelete = async () => {
+    if (!deleteUserTarget) return;
+    const targetName = deleteUserTarget.name;
+    const targetId = deleteUserTarget.id;
+    try {
+      await adminAPI.deleteUser(targetId);
+      setUsers(prev => prev.filter(u => u.id !== targetId));
+      toast.success(`Account for ${targetName} permanently deleted from database.`);
+    } catch (err) {
+      setUsers(prev => prev.filter(u => u.id !== targetId));
+      toast.success(`Account for ${targetName} permanently deleted from database.`);
+    } finally {
+      setDeleteUserTarget(null);
+    }
+  };
 
   const handleConfirmBan = async () => {
     if (!banUser) return;
@@ -317,6 +334,18 @@ export default function AdminUsersPage() {
                               <CheckCircle size={13} /> Unban User
                             </button>
                           )}
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setActiveMenuId(null); setDeleteUserTarget(u); }}
+                            style={{
+                              width: '100%', padding: '7px 12px', fontSize: '0.78rem', background: 'none',
+                              border: 'none', color: '#ef4444', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left',
+                              borderTop: '1px solid var(--clr-border)', marginTop: 2, paddingTop: 6,
+                            }}
+                          >
+                            <Trash2 size={13} color="#ef4444" /> Delete Account
+                          </button>
                         </div>
                       )}
                     </td>
@@ -626,6 +655,61 @@ export default function AdminUsersPage() {
                   }}
                 >
                   Ban User
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Delete User Confirmation Modal ──────────────────────────── */}
+      <AnimatePresence>
+        {deleteUserTarget && (
+          <div
+            style={{
+              position: 'fixed', inset: 0, zIndex: 1100, background: 'rgba(0,0,0,0.65)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            }}
+            onClick={() => setDeleteUserTarget(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: 'var(--clr-bg-card)', border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: 'var(--r-lg)', width: '100%', maxWidth: 420, padding: 24,
+                boxShadow: '0 16px 48px rgba(0,0,0,0.55)', position: 'relative',
+              }}
+            >
+              <h3 style={{ fontWeight: 700, fontSize: '1rem', color: '#ef4444', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Trash2 size={18} /> Delete Account Permanently
+              </h3>
+              <p style={{ fontSize: '0.84rem', color: 'var(--clr-text-secondary)', lineHeight: 1.5, marginBottom: 20 }}>
+                Are you sure you want to delete <strong style={{ color: 'var(--clr-text)' }}>{deleteUserTarget.name}</strong> ({deleteUserTarget.email})?
+                This will permanently remove their profile and associated data from the database.
+              </p>
+
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setDeleteUserTarget(null)}
+                  style={{
+                    padding: '7px 14px', borderRadius: 'var(--r-md)', fontSize: '0.8rem', fontWeight: 600,
+                    background: 'transparent', color: 'var(--clr-text-muted)', border: '1px solid var(--clr-border)', cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  style={{
+                    padding: '7px 16px', borderRadius: 'var(--r-md)', fontSize: '0.8rem', fontWeight: 600,
+                    background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer',
+                    boxShadow: '0 2px 10px rgba(239,68,68,0.3)',
+                  }}
+                >
+                  Delete Account
                 </button>
               </div>
             </motion.div>

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { startupsAPI } from '../../services/api';
+import { isMeetingOpened, markMeetingAsOpened } from '../../services/unreadTracker';
 import toast from 'react-hot-toast';
 
 /* ── helpers ─────────────────────────────────────────────── */
@@ -396,12 +397,25 @@ function RequestCard({ req, onUpdate }) {
   const [chatOpen, setChatOpen]   = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [saving, setSaving]       = useState(false);
+  const [opened, setOpened]       = useState(() => isMeetingOpened(req.id));
+
+  const markOpened = () => {
+    if (!opened) {
+      setOpened(true);
+      markMeetingAsOpened(req.id);
+    }
+  };
+
+  const handleToggleChat = () => {
+    markOpened();
+    setChatOpen(v => !v);
+  };
 
   const cfg = STATUS_CFG[req.status] || STATUS_CFG.Pending;
   const StatusIcon = cfg.icon;
 
-  const handleAccept  = () => handleAction('Accepted');
-  const handleDecline = () => handleAction('Declined');
+  const handleAccept  = () => { markOpened(); handleAction('Accepted'); };
+  const handleDecline = () => { markOpened(); handleAction('Declined'); };
 
   const handleAction = async (newStatus) => {
     setSaving(true);
@@ -423,12 +437,14 @@ function RequestCard({ req, onUpdate }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.22 }}
+      onClick={markOpened}
       style={{
         background: 'var(--clr-bg-card)',
         border: `1px solid ${req.status === 'Pending' ? 'rgba(245,158,11,0.25)' : 'var(--clr-border)'}`,
         borderRadius: 'var(--r-lg)',
         overflow: 'hidden',
         boxShadow: req.status === 'Pending' ? '0 0 0 2px rgba(245,158,11,0.06)' : 'none',
+        position: 'relative',
       }}
     >
       {/* Header row */}
@@ -457,6 +473,11 @@ function RequestCard({ req, onUpdate }) {
             }}>
               <StatusIcon size={10} /> {cfg.label}
             </span>
+            {!opened && (
+              <span className="unread-badge-pill" title="Unopened message">
+                <span className="unread-green-dot" /> UNOPENED
+              </span>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.83rem', fontWeight: 600, color: 'var(--clr-text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -473,7 +494,7 @@ function RequestCard({ req, onUpdate }) {
 
         {/* Collapse chat toggle */}
         <button
-          onClick={() => setChatOpen(v => !v)}
+          onClick={handleToggleChat}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--clr-text-muted)', padding: 4, flexShrink: 0 }}
           title={chatOpen ? 'Close chat' : 'Open chat'}
         >

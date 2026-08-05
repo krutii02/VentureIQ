@@ -9,7 +9,7 @@ from .views import (
     MLPredictView, DocumentListView,
     ROICalculatorView, BreakevenCalculatorView, AIGeneratorView,
     InvestorListView,
-    AdminStatsView, AdminUsersView, AdminBanUserView,
+    AdminStatsView, AdminUsersView, AdminBanUserView, AdminDeleteUserView,
     AdminApprovalsView, AdminActionApprovalView,
 )
 
@@ -59,6 +59,7 @@ urlpatterns = [
     path('admin/stats/', AdminStatsView.as_view(), name='admin_stats'),
     path('admin/users/', AdminUsersView.as_view(), name='admin_users'),
     path('admin/users/<str:user_id>/ban/', AdminBanUserView.as_view(), name='admin_ban_user'),
+    path('admin/users/<str:user_id>/delete/', AdminDeleteUserView.as_view(), name='admin_delete_user'),
     path('admin/approvals/', AdminApprovalsView.as_view(), name='admin_approvals'),
     path('admin/approvals/<str:approval_id>/action/', AdminActionApprovalView.as_view(), name='admin_action_approval'),
 ]

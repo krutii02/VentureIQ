@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { startupsAPI } from '../../services/api';
+import { isMeetingOpened, markMeetingAsOpened } from '../../services/unreadTracker';
 import toast from 'react-hot-toast';
 
 /* ── helpers ─────────────────────────────────────────────── */
@@ -383,6 +384,19 @@ function EmailComposerModal({ req, recipientEmail, recipientLabel, onClose }) {
 function SentCard({ req }) {
   const [chatOpen, setChatOpen]   = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
+  const [opened, setOpened]       = useState(() => isMeetingOpened(req.id));
+
+  const markOpened = () => {
+    if (!opened) {
+      setOpened(true);
+      markMeetingAsOpened(req.id);
+    }
+  };
+
+  const handleToggleChat = () => {
+    markOpened();
+    setChatOpen(v => !v);
+  };
 
   const cfg = STATUS_CFG[req.status] || STATUS_CFG.Pending;
   const StatusIcon = cfg.icon;
@@ -394,6 +408,7 @@ function SentCard({ req }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.22 }}
+      onClick={markOpened}
       style={{
         background: 'var(--clr-bg-card)',
         border: `1px solid ${
@@ -404,6 +419,7 @@ function SentCard({ req }) {
         borderRadius: 'var(--r-lg)',
         overflow: 'hidden',
         boxShadow: req.status === 'Accepted' ? '0 0 0 2px rgba(16,185,129,0.05)' : 'none',
+        position: 'relative',
       }}
     >
       {/* Main Row */}
@@ -432,6 +448,11 @@ function SentCard({ req }) {
             }}>
               <StatusIcon size={10} /> {cfg.label}
             </span>
+            {!opened && (
+              <span className="unread-badge-pill" title="Unopened message">
+                <span className="unread-green-dot" /> UNOPENED
+              </span>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: 14, marginTop: 5, flexWrap: 'wrap' }}>
@@ -455,7 +476,7 @@ function SentCard({ req }) {
 
         {/* Expand toggle */}
         <button
-          onClick={() => setChatOpen(v => !v)}
+          onClick={handleToggleChat}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--clr-text-muted)', padding: 4, flexShrink: 0 }}
           title={chatOpen ? 'Close chat' : 'Open chat'}
         >
@@ -481,7 +502,7 @@ function SentCard({ req }) {
       <div style={{ padding: '0 22px 16px', display: 'flex', gap: 8 }}>
         <button
           className={chatOpen ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'}
-          onClick={() => setChatOpen(v => !v)}
+          onClick={handleToggleChat}
           style={{
             display: 'flex', alignItems: 'center', gap: 5,
             ...(chatOpen ? {

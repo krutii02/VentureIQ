@@ -10,6 +10,7 @@ import {
   ChevronUp, Building2, Mail, ArrowUpRight, RefreshCw
 } from 'lucide-react';
 import { startupsAPI } from '../../services/api';
+import { getOpenedMeetingIds, isMeetingOpened, markMeetingAsOpened } from '../../services/unreadTracker';
 import toast from 'react-hot-toast';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -230,10 +231,12 @@ function MeetingPanel({ role, onClose }) {
             const cfg = STATUS_CFG[item.status] || STATUS_CFG.Pending;
             const StatusIcon = cfg.Icon;
             const isBusy = saving === item.id;
+            const unopened = !isMeetingOpened(item.id);
 
             return (
               <div
                 key={item.id}
+                onClick={() => markMeetingAsOpened(item.id)}
                 style={{
                   background: 'var(--clr-bg-secondary)',
                   border: `1px solid ${item.status === 'Pending' ? 'rgba(245,158,11,0.2)' : item.status === 'Accepted' ? 'rgba(16,185,129,0.15)' : 'var(--clr-border)'}`,
@@ -242,6 +245,7 @@ function MeetingPanel({ role, onClose }) {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 9,
+                  position: 'relative',
                 }}
               >
                 {/* Item header */}
@@ -255,8 +259,11 @@ function MeetingPanel({ role, onClose }) {
                     {role === 'FOUNDER' ? initials(item.investor_name) : initials(item.startup)}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--clr-text)', marginBottom: 2 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--clr-text)', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {role === 'FOUNDER' ? (item.investor_name || 'Investor') : item.startup}
+                      {unopened && (
+                        <span className="unread-green-dot" title="Unopened message" />
+                      )}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--clr-text-muted)' }}>
                       {role === 'FOUNDER'
@@ -446,6 +453,7 @@ export default function Sidebar() {
   const [watchlistCount, setWatchlistCount]       = useState(getWatchlistCount);
   const [meetingsCount, setMeetingsCount]         = useState(0);
   const [meetingsSentCount, setMeetingsSentCount] = useState(0);
+  const [hasUnreadConnections, setHasUnreadConnections] = useState(false);
 
   useEffect(() => {
     const sync = () => setWatchlistCount(getWatchlistCount());
@@ -457,7 +465,24 @@ export default function Sidebar() {
     };
   }, []);
 
-  /* ── Live meeting counts ─────────────────────────── */
+  /* ── Live meeting counts & unread check ─────────────────────────── */
+  const checkUnreadConnections = useCallback(async () => {
+    if (!user?.role) return;
+    try {
+      const openedSet = getOpenedMeetingIds();
+      let items = [];
+      if (user.role === 'FOUNDER') {
+        const res = await startupsAPI.getMeetings();
+        items = Array.isArray(res.data) ? res.data : [];
+      } else if (user.role === 'INVESTOR') {
+        const res = await startupsAPI.getMeetingsSent();
+        items = Array.isArray(res.data) ? res.data : [];
+      }
+      const hasUnread = items.some(m => !openedSet.has(String(m.id)));
+      setHasUnreadConnections(hasUnread);
+    } catch { /* silent */ }
+  }, [user?.role]);
+
   useEffect(() => {
     if (!user?.role) return;
     const fetchCounts = async () => {
@@ -474,9 +499,24 @@ export default function Sidebar() {
       } catch { /* silent */ }
     };
     fetchCounts();
-    const interval = setInterval(fetchCounts, 30000); // refresh every 30s
-    return () => clearInterval(interval);
-  }, [user?.role]);
+    checkUnreadConnections();
+
+    window.addEventListener('storage', checkUnreadConnections);
+    window.addEventListener('ventureiq_opened_meetings_changed', checkUnreadConnections);
+    window.addEventListener('ventureiq_notification_added', checkUnreadConnections);
+
+    const interval = setInterval(() => {
+      fetchCounts();
+      checkUnreadConnections();
+    }, 15000); // refresh every 15s
+
+    return () => {
+      window.removeEventListener('storage', checkUnreadConnections);
+      window.removeEventListener('ventureiq_opened_meetings_changed', checkUnreadConnections);
+      window.removeEventListener('ventureiq_notification_added', checkUnreadConnections);
+      clearInterval(interval);
+    };
+  }, [user?.role, checkUnreadConnections]);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -512,6 +552,8 @@ export default function Sidebar() {
           <div className="sidebar-section-label">Navigation</div>
           {navItems.map(item => {
             const badgeVal = item.badge ? getBadgeValue(item.badge) : null;
+            const isConnectionsTab = item.label === 'Connections';
+            const showGreenDot = isConnectionsTab && hasUnreadConnections;
 
             return (
               <NavLink
@@ -520,7 +562,15 @@ export default function Sidebar() {
                 className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
               >
                 <item.icon className="link-icon" strokeWidth={1.8} />
-                <span style={{ flex: 1 }}>{item.label}</span>
+                <span style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {item.label}
+                  {showGreenDot && (
+                    <span
+                      className="unread-green-dot"
+                      title="Unopened connection message"
+                    />
+                  )}
+                </span>
                 {item.badge && badgeVal > 0 && (
                   <span className="link-badge" style={{
                     background: item.badge === 'MEETINGS_COUNT' || item.badge === 'MEETINGS_SENT_COUNT'

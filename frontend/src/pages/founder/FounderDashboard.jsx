@@ -11,6 +11,7 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useStartup } from '../../context/StartupContext';
 import { startupsAPI } from '../../services/api';
+import { isMeetingOpened, markMeetingAsOpened } from '../../services/unreadTracker';
 
 // ── Mock Data ────────────────────────────────────────────────────────
 
@@ -72,6 +73,7 @@ export default function FounderDashboard() {
       .then(res => {
         if (res.data && res.data.length > 0) {
           const meetingActivities = res.data.map(m => ({
+            id: m.id,
             icon: '📧',
             text: `Connection request from ${m.investor_name} (${m.firm || 'VC'})`,
             time: 'Recently',
@@ -387,15 +389,32 @@ export default function FounderDashboard() {
           <span className="badge badge-info">Live</span>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:12 }}>
-          {activities.map((a, i) => (
-            <div key={i} style={{ display:'flex', gap:10, padding:'10px 12px', borderRadius:'var(--r-md)', background:'rgba(255,255,255,0.02)', border:'1px solid var(--clr-border)' }}>
-              <span style={{ fontSize:'1.2rem', flexShrink:0 }}>{a.icon}</span>
-              <div>
-                <p style={{ fontSize:'0.8rem', color:'var(--clr-text-secondary)', lineHeight:1.4 }}>{a.text}</p>
-                <span style={{ fontSize:'0.72rem', color:'var(--clr-text-muted)' }}>{a.time}</span>
-              </div>
-            </div>
-          ))}
+          {activities.map((a, i) => {
+            const unopened = a.type === 'meeting' && a.id && !isMeetingOpened(a.id);
+            return (
+              <Link
+                key={i}
+                to="/founder/meetings"
+                onClick={() => a.id && markMeetingAsOpened(a.id)}
+                style={{
+                  display:'flex', gap:10, padding:'10px 12px', borderRadius:'var(--r-md)',
+                  background:'rgba(255,255,255,0.02)', border:'1px solid var(--clr-border)',
+                  textDecoration: 'none', position: 'relative'
+                }}
+              >
+                <span style={{ fontSize:'1.2rem', flexShrink:0 }}>{a.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize:'0.8rem', color:'var(--clr-text-secondary)', lineHeight:1.4, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {a.text}
+                    {unopened && (
+                      <span className="unread-green-dot" title="Unopened message" />
+                    )}
+                  </p>
+                  <span style={{ fontSize:'0.72rem', color:'var(--clr-text-muted)' }}>{a.time}</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 

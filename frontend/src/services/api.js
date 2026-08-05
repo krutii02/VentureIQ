@@ -84,6 +84,7 @@ export const adminAPI = {
   getStats: () => api.get('/admin/stats/'),
   getUsers: () => api.get('/admin/users/'),
   banUser: (id, action = 'ban') => api.post(`/admin/users/${id}/ban/`, { action }),
+  deleteUser: (id) => api.delete(`/admin/users/${id}/delete/`),
   getApprovals: () => api.get('/admin/approvals/'),
   actionApproval: (id, action, notes) => api.post(`/admin/approvals/${id}/action/`, { action, notes }),
 };

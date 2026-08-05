@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { startupsAPI } from '../../services/api';
-
+import { markMeetingAsOpened } from '../../services/unreadTracker';
 import toast from 'react-hot-toast';
 
 const FOUNDER_PAGES = [
@@ -101,6 +101,7 @@ export default function Topbar({ title, subtitle }) {
   }, [user?.role]);
 
   const handleAcceptMeeting = (id) => {
+    markMeetingAsOpened(id);
     const target = notifications.find(n => n.id === id);
     const updated = notifications.map(n => n.id === id ? { ...n, status: 'Accepted', unread: false } : n);
     setNotifications(updated);
@@ -128,6 +129,7 @@ export default function Topbar({ title, subtitle }) {
   };
 
   const handleDeclineMeeting = (id) => {
+    markMeetingAsOpened(id);
     const target = notifications.find(n => n.id === id);
     const updated = notifications.map(n => n.id === id ? { ...n, status: 'Declined', unread: false } : n);
     setNotifications(updated);
@@ -157,6 +159,7 @@ export default function Topbar({ title, subtitle }) {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   const markAllRead = () => {
+    notifications.forEach(n => markMeetingAsOpened(n.id));
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   };
 

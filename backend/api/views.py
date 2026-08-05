@@ -1247,17 +1247,12 @@ class AdminUsersView(APIView):
 
         users = []
 
-        # 1. Registered User Accounts (Only accounts ACCEPTED by Admin appear in User Section)
+        # 1. Registered User Accounts (Newest created accounts first)
         profiles = list(UserProfile.objects.select_related('user').exclude(role='Admin'))
-        profiles.sort(key=lambda p: (p.user.last_login or p.user.date_joined), reverse=True)
+        profiles.sort(key=lambda p: (p.user.date_joined or p.user.last_login or timezone.now()), reverse=True)
 
         for p in profiles:
             u = p.user
-            # Only include accounts explicitly accepted by admin (or seeded accounts)
-            if u.id not in APPROVED_USER_IDS and u.id > 2:
-                # Still pending admin approval in Approvals section — skip from Users directory
-                continue
-
             startup_count = u.startups.count() if hasattr(u, 'startups') else 0
             meeting_count = MeetingRequest.objects.filter(user=u).count()
             accepted_count = MeetingRequest.objects.filter(user=u, status='Accepted').count()
@@ -1422,6 +1417,51 @@ class AdminBanUserView(APIView):
             'user_id': user_id,
             'is_active': is_active
         })
+
+
+class AdminDeleteUserView(APIView):
+    """Permanently removes a user account (or startup/investor profile) from the database."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, user_id):
+        profile = getattr(request.user, 'profile', None)
+        if not profile or profile.role.upper() not in ('ADMIN',):
+            return Response({'error': 'Forbidden'}, status=403)
+
+        raw_id_str = str(user_id)
+
+        # Handle startup prefix
+        if raw_id_str.startswith('startup_'):
+            st_id = raw_id_str.replace('startup_', '')
+            if st_id.isdigit():
+                st = Startup.objects.filter(id=int(st_id)).first()
+                if st:
+                    st.delete()
+                    return Response({'message': f'Startup {st_id} deleted successfully.', 'id': user_id})
+
+        # Handle investor prefix
+        elif raw_id_str.startswith('inv_'):
+            inv_id = raw_id_str.replace('inv_', '')
+            if inv_id.isdigit():
+                inv = Investor.objects.filter(id=int(inv_id)).first()
+                if inv:
+                    inv.delete()
+                    return Response({'message': f'Investor {inv_id} deleted successfully.', 'id': user_id})
+
+        # Handle User PK (user_X or numeric X)
+        clean_id = raw_id_str.replace('user_', '')
+        if clean_id.isdigit():
+            u_id = int(clean_id)
+            target_user = User.objects.filter(id=u_id).first()
+            if target_user:
+                target_name = target_user.get_full_name() or target_user.username
+                Investor.objects.filter(user=target_user).delete()
+                Startup.objects.filter(founder=target_user).delete()
+                UserProfile.objects.filter(user=target_user).delete()
+                target_user.delete()
+                return Response({'message': f'Account for {target_name} permanently removed from database.', 'id': user_id})
+
+        return Response({'error': 'Account not found'}, status=404)
 
 
 class AdminApprovalsView(APIView):
