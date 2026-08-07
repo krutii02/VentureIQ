@@ -5,6 +5,7 @@ import { BookmarkX, ArrowRight, TrendingUp, Bookmark, Search, Edit2, Check, Spar
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { startupsAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 export default function WatchlistPage() {
   const [watchlist, setWatchlist] = useState([]);
@@ -176,7 +177,7 @@ export default function WatchlistPage() {
                   {/* Footer Stats & Actions */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid var(--clr-border)' }}>
                     <div style={{ fontSize: '0.82rem', color: 'var(--clr-success)', fontWeight: 700 }}>
-                      {s.revenue} <span style={{ color: 'var(--clr-accent-1)', fontWeight: 600, fontSize: '0.75rem', marginLeft: 4 }}>{s.growth}</span>
+                      {formatCurrency(s.revenue)} <span style={{ color: 'var(--clr-accent-1)', fontWeight: 600, fontSize: '0.75rem', marginLeft: 4 }}>{s.growth}</span>
                     </div>
 
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>

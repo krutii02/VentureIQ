@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { formatCurrency } from '../../utils/currency';
 
 /* ── Animation Variants ──────────────────────────────────────────────── */
 const fadeUp = {
@@ -68,7 +69,7 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: '$299M+', label: 'Capital Match Capacity', sub: 'Summed ticket size of 60 investors' },
+  { value: `${formatCurrency(299000000, { compact: true })}+`, label: 'Capital Match Capacity', sub: 'Summed ticket size of 60 investors' },
   { value: '94.2%', label: 'Prediction Accuracy', sub: 'Scikit-learn ML benchmark' },
   { value: '60+', label: 'Evaluated Startups', sub: 'Benchmarked in platform database' },
   { value: '60+', label: 'Active VC Investors', sub: 'Matching ticket size & thesis' }
@@ -78,7 +79,7 @@ const TESTIMONIALS = [
   {
     name: 'Sarah Chen',
     role: 'Founder & CEO @ NeuralDrive AI',
-    firm: 'Raised $8M Series A',
+    firm: `Raised ${formatCurrency(8000000, { compact: true })} Series A`,
     text: 'VentureIQ\'s KNN prediction model flagged our burn-to-growth imbalance 3 months before our fundraising push. Fixing it boosted our AI score to 92% and closed our round in 3 weeks.',
     stars: 5,
     tag: 'Founder'
@@ -86,7 +87,7 @@ const TESTIMONIALS = [
   {
     name: 'Marcus Webb',
     role: 'Managing Partner @ Sequoia Capital',
-    firm: '$450M Tech Fund',
+    firm: `${formatCurrency(450000000, { compact: true })} Tech Fund`,
     text: 'The algorithmic startup scoring saves our deal team over 15 hours of manual screening every week. The Machine Learning prediction models are remarkably accurate.',
     stars: 5,
     tag: 'Investor'
@@ -314,7 +315,7 @@ export default function LandingPage() {
               maxWidth: 680, margin: '0 auto 36px', lineHeight: 1.7, fontWeight: 400
             }}
           >
-            VentureIQ evaluates startups using trained Machine Learning models and Gemini AI to connect founders with targeted VC investors faster than ever.
+            VentureIQ evaluates startups using trained ML models to connect founders with targeted Investors faster than ever.
           </motion.p>
 
           <motion.div
@@ -338,14 +339,16 @@ export default function LandingPage() {
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
             }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 20 }}>
               {STATS.map((s) => (
                 <div key={s.label} style={{ textAlign: 'center' }}>
                   <div style={{
-                    fontSize: '2.2rem', fontWeight: 900,
+                    fontSize: 'clamp(1.5rem, 2.2vw, 2.1rem)', fontWeight: 900,
                     fontFamily: "'Space Grotesk', sans-serif",
                     background: 'linear-gradient(135deg,#6366f1,#10b981)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    whiteSpace: 'nowrap'
+                    
                   }}>
                     {s.value}
                   </div>

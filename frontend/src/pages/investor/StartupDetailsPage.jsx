@@ -12,7 +12,9 @@ import {
 } from 'recharts';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../layouts/DashboardLayout';
+import { useAuth } from '../../context/AuthContext';
 import { startupsAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 export default function StartupDetailsPage() {
   const { id } = useParams();
@@ -360,8 +362,8 @@ export default function StartupDetailsPage() {
       {/* Metrics Row */}
       <div className="grid-4" style={{ marginBottom: 24 }}>
         {[
-          { label: 'Monthly Revenue', value: startup.revenue, sub: `${startup.growth} MoM`, color: 'var(--clr-success)', icon: '💰' },
-          { label: 'Total Valuation', value: startup.valuation || '$8.5M', sub: 'Post-money', color: 'var(--clr-accent-1)', icon: '📊' },
+          { label: 'Monthly Revenue', value: formatCurrency(startup.revenue || 0), sub: `${startup.growth} MoM`, color: 'var(--clr-success)', icon: '💰' },
+          { label: 'Total Valuation', value: formatCurrency(startup.valuation || '$8.5M', { compact: true }), sub: 'Post-money', color: 'var(--clr-accent-1)', icon: '📊' },
           { label: 'Team Size', value: `${startup.team} Employees`, sub: 'Engineering heavy', color: '#8b5cf6', icon: '👥' },
           { label: 'Active Users', value: startup.active_users ? startup.active_users.toLocaleString() : '12,400+', sub: 'Growing fanbase', color: '#f59e0b', icon: '⚡' },
         ].map(m => (
@@ -383,7 +385,7 @@ export default function StartupDetailsPage() {
             <div className="flex-between" style={{ marginBottom: 16 }}>
               <div>
                 <h3 style={{ fontWeight: 700, fontSize: '1rem' }}>Revenue Growth Trajectory</h3>
-                <p style={{ fontSize: '0.78rem', color: 'var(--clr-text-muted)' }}>Estimated monthly revenue in $K</p>
+                <p style={{ fontSize: '0.78rem', color: 'var(--clr-text-muted)' }}>Estimated monthly revenue trend</p>
               </div>
               <span className="badge badge-success">{startup.growth} Growth</span>
             </div>
@@ -397,8 +399,8 @@ export default function StartupDetailsPage() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="month" stroke="var(--clr-text-muted)" fontSize={11} axisLine={false} tickLine={false} />
-                <YAxis stroke="var(--clr-text-muted)" fontSize={11} axisLine={false} tickLine={false} tickFormatter={v => `$${v}K`} />
-                <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="card" style={{ padding: '8px 12px', fontSize: '0.82rem' }}>{label}: ${payload[0].value}K</div> : null} />
+                <YAxis stroke="var(--clr-text-muted)" fontSize={11} axisLine={false} tickLine={false} tickFormatter={v => formatCurrency(v * 1000, { compact: true })} />
+                <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="card" style={{ padding: '8px 12px', fontSize: '0.82rem' }}>{label}: {formatCurrency(payload[0].value * 1000, { compact: true })}</div> : null} />
                 <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} fill="url(#chartGrad)" />
               </AreaChart>
             </ResponsiveContainer>

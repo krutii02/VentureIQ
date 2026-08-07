@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { adminAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 import toast from 'react-hot-toast';
 
 export default function AdminUsersPage() {
@@ -476,11 +477,11 @@ export default function AdminUsersPage() {
 
                     <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: 'var(--r-md)', border: '1px solid var(--clr-border)' }}>
                       <div style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)', marginBottom: 2 }}>Valuation</div>
-                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--clr-text)' }}>{profileUser.valuation || '$5.0M'}</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--clr-text)' }}>{formatCurrency(profileUser.valuation || '$5.0M')}</div>
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', borderRadius: 'var(--r-md)', border: '1px solid var(--clr-border)' }}>
                       <div style={{ fontSize: '0.7rem', color: 'var(--clr-text-muted)', marginBottom: 2 }}>Monthly Revenue</div>
-                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--clr-text)' }}>{profileUser.revenue || '$25.0K/mo'}</div>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--clr-text)' }}>{formatCurrency(profileUser.revenue || 25000, { suffix: '/month' })}</div>
                     </div>
                     <div style={{ background: 'rgba(16,185,129,0.08)', padding: '12px 14px', borderRadius: 'var(--r-md)', border: '1px solid rgba(16,185,129,0.2)' }}>
                       <div style={{ fontSize: '0.7rem', color: 'var(--clr-success)', marginBottom: 2 }}>Growth Rate</div>

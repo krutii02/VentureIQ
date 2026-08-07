@@ -12,7 +12,6 @@ const FOUNDER_PAGES = [
   { label: 'My Startup', path: '/founder/startup', keywords: 'startup profile manage' },
   { label: 'AI Analysis', path: '/founder/ai-analysis', keywords: 'ml prediction swot ai analysis' },
   { label: 'Analytics', path: '/founder/analytics', keywords: 'charts data analytics metrics' },
-  { label: 'AI Video', path: '/founder/ai-video', keywords: 'video pitch ai generate' },
   { label: 'Documents', path: '/founder/documents', keywords: 'documents reports predictions ml' },
   { label: 'Bonus Tools', path: '/founder/bonus-tools', keywords: 'tagline email name generator' },
 ];

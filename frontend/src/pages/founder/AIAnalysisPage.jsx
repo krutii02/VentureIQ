@@ -5,13 +5,14 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { analysisAPI } from '../../services/api';
 import { useStartup } from '../../context/StartupContext';
+import { formatCurrency } from '../../utils/currency';
 
 const METRICS_FORM = [
   { key:'industry', label:'Industry', type:'select', options:['Healthcare','FinTech','EdTech','CleanTech','SaaS','E-Commerce','AgriTech','Cybersecurity','Logistics','Robotics'] },
   { key:'funding_stage', label:'Funding Stage', type:'select', options:['Bootstrap','Pre-Seed','Seed','Series A','Series B','Series C'] },
   { key:'team_size', label:'Team Size', type:'number', placeholder:'e.g. 24' },
-  { key:'monthly_revenue_usd', label:'Monthly Revenue ($)', type:'number', placeholder:'e.g. 71000' },
-  { key:'burn_rate', label:'Monthly Burn Rate ($)', type:'number', placeholder:'e.g. 28000' },
+  { key:'monthly_revenue_usd', label:'Monthly Revenue (₹)', type:'number', placeholder:'e.g. 71000' },
+  { key:'burn_rate', label:'Monthly Burn Rate (₹)', type:'number', placeholder:'e.g. 28000' },
   { key:'active_users', label:'Active Users', type:'number', placeholder:'e.g. 12400' },
   { key:'customer_growth_rate', label:'Customer Growth Rate (%)', type:'number', placeholder:'e.g. 21' },
   { key:'founder_experience_years', label:'Founder Experience (years)', type:'number', placeholder:'e.g. 8' },
@@ -75,12 +76,12 @@ export default function AIAnalysisPage() {
 
     return {
       strengths: [
-        `Strong monthly revenue trajectory of $${rev.toLocaleString()} in ${metrics.industry}`,
+        `Strong monthly revenue trajectory of ${formatCurrency(rev)} in ${metrics.industry}`,
         `Experienced leadership with ${exp} years of direct industry & technical experience`,
         `Healthy unit economics with ${(growth > 15 ? 'high' : 'steady')} ${growth}% MoM growth`
       ],
       weaknesses: [
-        burn > rev ? `Monthly burn rate ($${burn.toLocaleString()}) exceeds monthly revenue ($${rev.toLocaleString()})` : `CAC reduction strategy required to maintain high return on ad spend`,
+        burn > rev ? `Monthly burn rate (${formatCurrency(burn)}) exceeds monthly revenue (${formatCurrency(rev)})` : `CAC reduction strategy required to maintain high return on ad spend`,
         team < 10 ? `Compact team size of ${team} members requires hiring senior key leads` : `Operational overhead of managing ${team} employees across departments`
       ],
       opportunities: [
@@ -178,7 +179,7 @@ export default function AIAnalysisPage() {
       {/* Tab Bar */}
       <div style={{ display:'flex', gap:4, background:'var(--clr-bg-card)', borderRadius:'var(--r-md)', padding:4, width:'fit-content', marginBottom:24, border:'1px solid var(--clr-border)' }}>
         {[
-          { id:'predict', label:'🤖 ML Prediction' },
+          { id:'predict', label:'🤖 Predictions' },
           { id:'swot', label:'💡 SWOT Analysis' },
           { id:'health', label:'📊 Business Health' },
         ].map(t => (
@@ -218,7 +219,7 @@ export default function AIAnalysisPage() {
                     {loading ? (
                       <><span style={{ width:16,height:16,border:'2px solid rgba(255,255,255,0.3)',borderTopColor:'#fff',borderRadius:'50%',animation:'spin-slow 0.6s linear infinite',display:'inline-block' }} /> Computing AI Prediction…</>
                     ) : (
-                      <><Brain size={16}/> Run ML Prediction</>
+                      <><Brain size={16}/> Run Prediction</>
                     )}
                   </button>
                 </div>
@@ -230,7 +231,7 @@ export default function AIAnalysisPage() {
                   <div className="card" style={{ height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', gap:16, padding:40 }}>
                     <div style={{ fontSize:'4rem' }}>🤖</div>
                     <h3 style={{ fontWeight:700 }}>Interactive AI Prediction Engine</h3>
-                    <p style={{ color:'var(--clr-text-muted)', maxWidth:340, fontSize:'0.88rem', lineHeight:1.6 }}>Adjust your metrics in the form on the left and click <strong>"Run ML Prediction"</strong> to view real-time dynamic AI scores & tailored recommendations.</p>
+                    <p style={{ color:'var(--clr-text-muted)', maxWidth:340, fontSize:'0.88rem', lineHeight:1.6 }}>Adjust your metrics in the form on the left and click <strong>"Run Prediction"</strong> to view real-time dynamic AI scores & tailored recommendations.</p>
                   </div>
                 )}
                 {loading && (
@@ -264,7 +265,7 @@ export default function AIAnalysisPage() {
                       <div>
                         <div style={{ fontSize:'0.75rem', color:'var(--clr-text-muted)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em' }}>Projected 12-Month Revenue</div>
                         <div style={{ fontSize:'2rem', fontWeight:900, color:'var(--clr-success)', fontFamily:"'Space Grotesk',sans-serif", marginTop:4 }}>
-                          ${(result.predicted_revenue_12m/1000000).toFixed(2)}M
+                          {formatCurrency(result.predicted_revenue_12m, { compact: true })}
                         </div>
                       </div>
                       <TrendingUp size={44} color="rgba(16,185,129,0.4)" />
@@ -276,7 +277,7 @@ export default function AIAnalysisPage() {
                       {result.insights.map((ins,i) => (
                         <div key={i} style={{ display:'flex', gap:10, marginBottom:10 }}>
                           <CheckCircle size={15} color="var(--clr-success)" style={{ flexShrink:0, marginTop:2 }} />
-                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>{ins}</span>
+                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>{String(ins).replace(/\$/g, '₹')}</span>
                         </div>
                       ))}
                     </div>
@@ -287,7 +288,7 @@ export default function AIAnalysisPage() {
                       {result.recommendations.map((rec,i) => (
                         <div key={i} style={{ display:'flex', gap:10, marginBottom:10, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:'var(--r-sm)', border:'1px solid rgba(245,158,11,0.18)' }}>
                           <span style={{ color:'var(--clr-warning)', fontWeight:700, fontSize:'0.85rem', flexShrink:0 }}>{i+1}.</span>
-                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>{rec}</span>
+                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>{String(rec).replace(/\$/g, '₹')}</span>
                         </div>
                       ))}
                     </div>
@@ -349,7 +350,7 @@ export default function AIAnalysisPage() {
                     {(currentSwot[s.key] || []).map((item,i) => (
                       <li key={i} style={{ display:'flex', gap:8, fontSize:'0.84rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>
                         <span style={{ color:s.color, fontWeight:700, flexShrink:0 }}>→</span>
-                        {item}
+                        {String(item).replace(/\$/g, '₹')}
                       </li>
                     ))}
                   </ul>

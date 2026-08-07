@@ -11,6 +11,7 @@ import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useStartup } from '../../context/StartupContext';
 import { startupsAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 import { isMeetingOpened, markMeetingAsOpened } from '../../services/unreadTracker';
 
 // ── Mock Data ────────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ export default function FounderDashboard() {
         <div style={{ fontSize:'0.78rem', color:'var(--clr-text-muted)', marginBottom:6 }}>{label}</div>
         {payload.map(p => (
           <div key={p.name} style={{ fontSize:'0.88rem', fontWeight:600, color:p.color }}>
-            {p.name}: ${(p.value/1000).toFixed(0)}K
+            {p.name}: {formatCurrency(p.value, { compact: true })}
           </div>
         ))}
       </div>
@@ -185,9 +186,9 @@ export default function FounderDashboard() {
 
       {/* Stats Row */}
       <div className="grid-4" style={{ marginBottom:24 }}>
-        <StatCard icon="💰" label="Monthly Revenue" value={startup.revenue || '$71,000/mo'} change="+14.5%" changeUp gradient="rgba(16,185,129,0.15)" />
-        <StatCard icon="🔥" label="Burn Rate" value={`$${(burnBase/1000).toFixed(0)}K/mo`} change="-8.2%" changeUp={false} gradient="rgba(239,68,68,0.15)" />
-        <StatCard icon="⏳" label="Runway" value="18 mo" change="+2 mo" changeUp gradient="rgba(245,158,11,0.15)" />
+        <StatCard icon="💰" label="Monthly Revenue" value={formatCurrency(startup.revenue || 71000, { suffix: '/month' })} change="+14.5%" changeUp gradient="rgba(16,185,129,0.15)" />
+        <StatCard icon="🔥" label="Burn Rate" value={formatCurrency(burnBase, { suffix: '/month', compact: true })} change="-8.2%" changeUp={false} gradient="rgba(239,68,68,0.15)" />
+        <StatCard icon="⏳" label="Runway" value="18 months" change="+2 months" changeUp gradient="rgba(245,158,11,0.15)" />
         <StatCard icon="👥" label="Active Users" value={Number(startup.active_users || 12400).toLocaleString()} change="+21%" changeUp gradient="rgba(99,102,241,0.15)" />
       </div>
 
@@ -217,7 +218,7 @@ export default function FounderDashboard() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="month" stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>`$${v/1000}K`} />
+              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>formatCurrency(v, { compact: true })} />
               <Tooltip content={<CustomTooltip/>} />
               <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#6366f1" strokeWidth={2} fill="url(#revGrad)" dot={false} />
               <Area type="monotone" dataKey="target" name="Target" stroke="#10b981" strokeWidth={2} strokeDasharray="4 4" fill="url(#tgtGrad)" dot={false} />

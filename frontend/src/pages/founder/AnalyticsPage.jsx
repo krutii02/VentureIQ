@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { useStartup } from '../../context/StartupContext';
+import { formatCurrency } from '../../utils/currency';
 
 const ChartTooltip = ({ active, payload, label, prefix='', suffix='' }) => {
   if (!active || !payload?.length) return null;
@@ -14,7 +15,7 @@ const ChartTooltip = ({ active, payload, label, prefix='', suffix='' }) => {
       <div style={{ fontSize:'0.75rem', color:'var(--clr-text-muted)', marginBottom:6, fontWeight:600 }}>{label}</div>
       {payload.map(p => (
         <div key={p.name} style={{ fontSize:'0.85rem', fontWeight:600, color:p.color }}>
-          {p.name}: {prefix}{typeof p.value === 'number' && p.value > 999 ? `$${(p.value/1000).toFixed(0)}K` : p.value}{suffix}
+          {p.name}: {typeof p.value === 'number' && (p.name.toLowerCase().includes('rev') || p.name.toLowerCase().includes('burn') || p.name.toLowerCase().includes('ltv') || p.name.toLowerCase().includes('cac')) ? formatCurrency(p.value, { compact: true }) : `${prefix}${p.value}${suffix}`}
         </div>
       ))}
     </div>
@@ -69,7 +70,7 @@ export default function AnalyticsPage() {
       {/* KPI Summary */}
       <div className="grid-4" style={{ marginBottom:24 }}>
         {[
-          { label:'Avg Monthly Revenue', value:'$59K', sub:'8-month average', color:'#6366f1' },
+          { label:'Avg Monthly Revenue', value: formatCurrency(59000, { compact: true }), sub:'8-month average', color:'#6366f1' },
           { label:'User Growth', value:'+51%', sub:'Jan → Aug', color:'#10b981' },
           { label:'CAC Improvement', value:'-19%', sub:'Cost per acquisition', color:'#f59e0b' },
           { label:'LTV:CAC Ratio', value:'4.7x', sub:'Industry avg: 3x', color:'#8b5cf6' },
@@ -87,7 +88,7 @@ export default function AnalyticsPage() {
         <div className="card">
           <div style={{ marginBottom:16 }}>
             <h3 style={{ fontWeight:700, fontSize:'0.95rem' }}>Monthly Revenue — {startup.name}</h3>
-            <p style={{ fontSize:'0.75rem', color:'var(--clr-text-muted)' }}>USD · 2025</p>
+            <p style={{ fontSize:'0.75rem', color:'var(--clr-text-muted)' }}>INR (₹) · 2025</p>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={monthlyData}>
@@ -99,7 +100,7 @@ export default function AnalyticsPage() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="month" stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>`$${v/1000}K`} />
+              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>formatCurrency(v, { compact: true })} />
               <Tooltip content={<ChartTooltip/>} />
               <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#6366f1" strokeWidth={2.5} fill="url(#revG)" dot={{ fill:'#6366f1', r:4 }} />
             </AreaChart>
@@ -134,7 +135,7 @@ export default function AnalyticsPage() {
             <LineChart data={burnData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="month" stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>`$${v/1000}K`} />
+              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>formatCurrency(v, { compact: true })} />
               <Tooltip content={<ChartTooltip/>} />
               <Legend wrapperStyle={{ fontSize:'0.78rem', paddingTop:8 }} />
               <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#10b981" strokeWidth={2.5} dot={false} />
@@ -152,8 +153,8 @@ export default function AnalyticsPage() {
             <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="month" stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>`$${v}`} />
-              <Tooltip content={<ChartTooltip prefix="$"/>} />
+              <YAxis stroke="var(--clr-text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v=>formatCurrency(v, { compact: true })} />
+              <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize:'0.78rem', paddingTop:8 }} />
               <Line type="monotone" dataKey="ltv" name="LTV" stroke="#6366f1" strokeWidth={2.5} dot={{ fill:'#6366f1', r:3 }} />
               <Line type="monotone" dataKey="cac" name="CAC" stroke="#f59e0b" strokeWidth={2.5} dot={{ fill:'#f59e0b', r:3 }} />
@@ -182,10 +183,10 @@ export default function AnalyticsPage() {
               {monthlyData.map(r => (
                 <tr key={r.month}>
                   <td style={{ fontWeight:600 }}>{r.month} 2025</td>
-                  <td style={{ color:'var(--clr-success)', fontWeight:600 }}>${(r.revenue/1000).toFixed(0)}K</td>
+                  <td style={{ color:'var(--clr-success)', fontWeight:600 }}>{formatCurrency(r.revenue, { compact: true })}</td>
                   <td>{r.users.toLocaleString()}</td>
-                  <td style={{ color:'var(--clr-warning)' }}>${r.cac}</td>
-                  <td style={{ color:'var(--clr-accent-1)' }}>${r.ltv}</td>
+                  <td style={{ color:'var(--clr-warning)' }}>{formatCurrency(r.cac)}</td>
+                  <td style={{ color:'var(--clr-accent-1)' }}>{formatCurrency(r.ltv)}</td>
                   <td style={{ fontWeight:700, color: (r.ltv/r.cac) >= 4 ? 'var(--clr-success)' : 'var(--clr-text-secondary)' }}>
                     {(r.ltv/r.cac).toFixed(1)}x
                   </td>

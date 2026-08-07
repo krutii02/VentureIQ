@@ -13,7 +13,6 @@ import FounderDashboard       from './pages/founder/FounderDashboard';
 import StartupManagementPage  from './pages/founder/StartupManagementPage';
 import AIAnalysisPage         from './pages/founder/AIAnalysisPage';
 import AnalyticsPage          from './pages/founder/AnalyticsPage';
-import AIVideoGenPage         from './pages/founder/AIVideoGenPage';
 import BonusToolsPage         from './pages/founder/BonusToolsPage';
 
 import SettingsPage           from './pages/founder/SettingsPage';
@@ -50,7 +49,6 @@ export default function App() {
       <Route path="/founder/startup"    element={<ProtectedRoute><RoleGuard roles={['FOUNDER']}><StartupManagementPage /></RoleGuard></ProtectedRoute>} />
       <Route path="/founder/ai-analysis" element={<ProtectedRoute><RoleGuard roles={['FOUNDER']}><AIAnalysisPage /></RoleGuard></ProtectedRoute>} />
       <Route path="/founder/analytics"  element={<ProtectedRoute><RoleGuard roles={['FOUNDER']}><AnalyticsPage /></RoleGuard></ProtectedRoute>} />
-      <Route path="/founder/ai-video"   element={<ProtectedRoute><RoleGuard roles={['FOUNDER']}><AIVideoGenPage /></RoleGuard></ProtectedRoute>} />
 
       <Route path="/founder/bonus-tools" element={<ProtectedRoute><RoleGuard roles={['FOUNDER']}><BonusToolsPage /></RoleGuard></ProtectedRoute>} />
       <Route path="/founder/settings"         element={<ProtectedRoute><RoleGuard roles={['FOUNDER']}><SettingsPage /></RoleGuard></ProtectedRoute>} />

@@ -9,6 +9,7 @@ import { TrendingUp, Search, Bookmark, ArrowRight, Star, Filter } from 'lucide-r
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { startupsAPI, profileAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 export default function InvestorDashboard() {
   const { user, updateUser } = useAuth();
@@ -190,7 +191,7 @@ export default function InvestorDashboard() {
                         </div>
                       </td>
                       <td style={{ fontSize: '0.82rem', color: 'var(--clr-text-secondary)' }}>{s.stage}</td>
-                      <td style={{ color: 'var(--clr-success)', fontWeight: 600, fontSize: '0.85rem' }}>{s.revenue || '$0'}</td>
+                      <td style={{ color: 'var(--clr-success)', fontWeight: 600, fontSize: '0.85rem' }}>{formatCurrency(s.revenue || 0)}</td>
                       <td><span className={`badge ${s.risk_level === 'Low' ? 'badge-success' : s.risk_level === 'Medium' ? 'badge-warning' : 'badge-danger'}`}>{s.risk_level || 'Medium'}</span></td>
                       <td>
                         <Link to={`/investor/startup/${s.id}`} className="btn btn-ghost btn-sm">View <ArrowRight size={12} /></Link>
@@ -255,7 +256,7 @@ export default function InvestorDashboard() {
               <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                 <XAxis type="number" dataKey="x" name="Score" domain={[60, 100]} unit="%" stroke="var(--clr-text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis type="number" dataKey="y" name="Revenue" stroke="var(--clr-text-muted)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}K`} />
+                <YAxis type="number" dataKey="y" name="Revenue" stroke="var(--clr-text-muted)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={v => formatCurrency(v, { compact: true })} />
                 <ZAxis type="number" dataKey="z" range={[30, 200]} />
                 <Tooltip cursor={{ strokeDasharray: '3 3' }} content={({ active, payload }) => active && payload?.length ? <div className="card" style={{ padding: '8px 12px', fontSize: '0.82rem' }}>{payload[0]?.payload?.name} (Score: {payload[0]?.value}%)</div> : null} />
                 <Scatter data={scatterData} fill="#6366f1" fillOpacity={0.7}>

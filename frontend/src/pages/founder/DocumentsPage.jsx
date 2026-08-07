@@ -4,6 +4,7 @@ import { FileText, Download, Eye, Clock, Brain, Target, TrendingUp, Search, Filt
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { analysisAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 const DEFAULT_DOCUMENTS = [
   {
@@ -257,7 +258,7 @@ export default function DocumentsPage() {
 
                   <div style={{ padding: '12px 14px', background: 'rgba(16,185,129,0.06)', borderRadius: 'var(--r-md)', border: '1px solid rgba(16,185,129,0.15)' }}>
                     <div style={{ fontSize: '0.72rem', color: 'var(--clr-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Projected 12-Month Revenue</div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--clr-success)', fontFamily: "'Space Grotesk',sans-serif" }}>{selectedDoc.details.revenue12m}</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--clr-success)', fontFamily: "'Space Grotesk',sans-serif" }}>{formatCurrency(selectedDoc.details.revenue12m)}</div>
                   </div>
 
                   <div>
@@ -265,7 +266,7 @@ export default function DocumentsPage() {
                     {(selectedDoc.details.insights || []).map((ins, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                         <span style={{ color: 'var(--clr-success)', flexShrink: 0, marginTop: 2 }}>→</span>
-                        <span style={{ fontSize: '0.82rem', color: 'var(--clr-text-secondary)', lineHeight: 1.5 }}>{ins}</span>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--clr-text-secondary)', lineHeight: 1.5 }}>{String(ins).replace(/\$/g, '₹')}</span>
                       </div>
                     ))}
                   </div>
@@ -273,9 +274,9 @@ export default function DocumentsPage() {
                   <div>
                     <h4 style={{ fontWeight: 700, marginBottom: 10, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 6 }}><AlertTriangle size={14} color="var(--clr-warning)" /> Recommendations</h4>
                     {(selectedDoc.details.recommendations || []).map((rec, i) => (
-                      <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, padding: '8px 10px', background: 'rgba(245,158,11,0.06)', borderRadius: 'var(--r-sm)' }}>
-                        <span style={{ color: 'var(--clr-warning)', fontWeight: 700, fontSize: '0.82rem', flexShrink: 0 }}>{i + 1}.</span>
-                        <span style={{ fontSize: '0.82rem', color: 'var(--clr-text-secondary)', lineHeight: 1.5 }}>{rec}</span>
+                      <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                        <span style={{ color: 'var(--clr-warning)', flexShrink: 0, marginTop: 2 }}>•</span>
+                        <span style={{ fontSize: '0.82rem', color: 'var(--clr-text-secondary)', lineHeight: 1.5 }}>{String(rec).replace(/\$/g, '₹')}</span>
                       </div>
                     ))}
                   </div>

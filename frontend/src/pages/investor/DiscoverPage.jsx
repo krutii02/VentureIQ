@@ -4,6 +4,7 @@ import { Search, Filter, Bookmark, BookmarkCheck, ArrowRight, TrendingUp, Star, 
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { startupsAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 const INDUSTRIES = ['All', 'Healthcare', 'CleanTech', 'SaaS', 'EdTech', 'FinTech', 'AgriTech', 'AI & Machine Learning', 'Cybersecurity', 'E-commerce', 'Logistics', 'Robotics'];
 const STAGES = ['All', 'Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C'];
@@ -283,7 +284,7 @@ export default function DiscoverPage() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
                       {[
-                        { label: 'Revenue', value: s.revenue, color: 'var(--clr-success)' },
+                        { label: 'Revenue', value: formatCurrency(s.revenue), color: 'var(--clr-success)' },
                         { label: 'Growth', value: s.growth, color: 'var(--clr-accent-1)' },
                         { label: 'Team', value: `${s.team} ppl`, color: 'var(--clr-text-secondary)' },
                       ].map(m => (
@@ -333,7 +334,7 @@ export default function DiscoverPage() {
                         </td>
                         <td><span className="badge badge-info">{s.industry}</span></td>
                         <td style={{ fontSize: '0.82rem', color: 'var(--clr-text-secondary)' }}>{s.stage}</td>
-                        <td style={{ color: 'var(--clr-success)', fontWeight: 600, fontSize: '0.85rem' }}>{s.revenue}</td>
+                        <td style={{ color: 'var(--clr-success)', fontWeight: 600, fontSize: '0.85rem' }}>{formatCurrency(s.revenue)}</td>
                         <td style={{ color: 'var(--clr-accent-1)', fontWeight: 600 }}>{s.growth}</td>
                         <td style={{ fontWeight: 800, color: s.score >= 85 ? 'var(--clr-success)' : s.score >= 75 ? '#6366f1' : 'var(--clr-warning)', fontFamily: "'Space Grotesk',sans-serif" }}>{s.score}%</td>
                         <td><span className={`badge ${s.risk === 'Low' ? 'badge-success' : s.risk === 'Medium' ? 'badge-warning' : 'badge-danger'}`}>{s.risk}</span></td>

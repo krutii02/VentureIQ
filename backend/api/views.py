@@ -951,9 +951,9 @@ class MLPredictView(APIView):
                 'predicted_revenue_12m': round(monthly_rev * 12 * (1 + growth_rate / 100)),
                 'investor_interest_score': min(99, max(40, round(score * 1.04))),
                 'insights': [
-                    f"Monthly revenue of ${monthly_rev:,.0f} with {growth_rate}% growth in {industry}.",
+                    f"Monthly revenue of ₹{round(monthly_rev * 83.5):,.0f} with {growth_rate}% growth in {industry}.",
                     f"Burn efficiency of {monthly_rev / max(1.0, burn_rate):.1f}x.",
-                    f"Team of {team_size} generating ${round(monthly_rev / max(1, team_size)):,}/employee.",
+                    f"Team of {team_size} generating ₹{round((monthly_rev * 83.5) / max(1, team_size)):,}/employee.",
                     f"Founder experience of {exp_years:.0f} years lowers execution risk.",
                 ],
                 'recommendations': [

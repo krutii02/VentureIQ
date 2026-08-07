@@ -9,17 +9,15 @@ import {
 } from 'lucide-react';
 import { investorsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import { formatCurrency } from '../../utils/currency';
 
 /* ═══════════════════════════════════════════════
    HELPERS
 ═══════════════════════════════════════════════ */
 function fmtAmount(val) {
-  const n = parseFloat(val);
-  if (!n || isNaN(n)) return '—';
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
-  return `$${n}`;
+  if (val === null || val === undefined || val === '') return '—';
+  const formatted = formatCurrency(val);
+  return formatted || '—';
 }
 
 function initials(name) {

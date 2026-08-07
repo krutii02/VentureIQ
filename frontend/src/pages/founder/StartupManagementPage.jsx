@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { useStartup } from '../../context/StartupContext';
 import { startupsAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 const INDUSTRIES = [
   'SaaS', 'FinTech', 'EdTech', 'Healthcare', 'CleanTech', 'AgriTech',
@@ -268,8 +269,8 @@ export default function StartupManagementPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <div className="grid-2">
-                  <Field label="Monthly Revenue" hint="e.g. $50K/mo or leave blank">
-                    <input className="form-input" placeholder="$50K/mo" value={form.revenue} onChange={e => setF('revenue', e.target.value)} />
+                  <Field label="Monthly Revenue" hint="e.g. ₹41.75 L/month or leave blank">
+                    <input className="form-input" placeholder="₹41.75 L/month" value={form.revenue} onChange={e => setF('revenue', e.target.value)} />
                   </Field>
                   <Field label="MoM Growth" hint="e.g. +18%">
                     <input className="form-input" placeholder="+18%" value={form.growth} onChange={e => setF('growth', e.target.value)} />
@@ -480,8 +481,8 @@ export default function StartupManagementPage() {
             <div className="grid-2">
               <Field label="Monthly Revenue">
                 {isEditing
-                  ? <input className="form-input" placeholder="$50K/mo" value={editForm.revenue || ''} onChange={e => setE('revenue', e.target.value)} />
-                  : <div className="form-input" style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--clr-success)', fontWeight: 700 }}>{startup.revenue || '—'}</div>}
+                  ? <input className="form-input" placeholder="₹41.75 L/month" value={editForm.revenue || ''} onChange={e => setE('revenue', e.target.value)} />
+                  : <div className="form-input" style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--clr-success)', fontWeight: 700 }}>{formatCurrency(startup.revenue) || '—'}</div>}
               </Field>
               <Field label="MoM Growth">
                 {isEditing

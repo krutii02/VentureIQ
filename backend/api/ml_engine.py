@@ -426,17 +426,19 @@ class MLEngine:
         rev_per_employee = round(monthly_rev / team_safe)
         runway = round(burn_efficiency * 12, 1)
 
+        USD_TO_INR = 83.5
+
         # Dynamic insights informed by ML outputs
         insights = [
-            f"Linear Regression projects ${predicted_rev:,.0f} annual revenue — "
-            f"monthly revenue of ${monthly_rev:,.0f} with {growth_rate}% growth in {industry}.",
+            f"Linear Regression projects ₹{(predicted_rev * USD_TO_INR):,.0f} annual revenue — "
+            f"monthly revenue of ₹{(monthly_rev * USD_TO_INR):,.0f} with {growth_rate}% growth in {industry}.",
 
             f"Polynomial Regression predicts adjusted growth rate of {predicted_growth:.1f}% — "
-            f"burn efficiency of {burn_efficiency:.1f}x (${monthly_rev:,.0f} MRR vs ${burn_rate:,.0f} burn) "
+            f"burn efficiency of {burn_efficiency:.1f}x (₹{(monthly_rev * USD_TO_INR):,.0f} MRR vs ₹{(burn_rate * USD_TO_INR):,.0f} burn) "
             f"implies {runway:.0f}-month runway.",
 
             f"Decision Tree classifies risk as '{risk_level}' — lean team ({team_size} employees) "
-            f"generates ${rev_per_employee:,.0f} revenue/employee, "
+            f"generates ₹{(rev_per_employee * USD_TO_INR):,.0f} revenue/employee, "
             f"{'above' if rev_per_employee > 3000 else 'near'} {stage} average.",
 
             f"KNN model ({success_prob}% success probability) factors {exp_years:.0f} years founder "
@@ -447,13 +449,13 @@ class MLEngine:
         recommendations = []
         if burn_rate > monthly_rev:
             recommendations.append(
-                f"Random Forest flags elevated burn: reduce ${burn_rate:,.0f}/mo burn by 15–20% "
+                f"Random Forest flags elevated burn: reduce ₹{(burn_rate * USD_TO_INR):,.0f}/month burn by 15–20% "
                 f"to reach profitability before next fundraising round."
             )
         else:
             recommendations.append(
                 f"ML models confirm positive unit economics: reinvest surplus "
-                f"${(monthly_rev - burn_rate):,.0f}/mo into targeted customer acquisition."
+                f"₹{((monthly_rev - burn_rate) * USD_TO_INR):,.0f}/month into targeted customer acquisition."
             )
 
         if predicted_growth < 15:
@@ -481,13 +483,13 @@ class MLEngine:
         # SWOT
         swot = {
             "strengths": [
-                f"High revenue productivity of ${rev_per_employee:,.0f}/employee (Linear Regression validated)",
+                f"High revenue productivity of ₹{(rev_per_employee * USD_TO_INR):,.0f}/employee (Linear Regression validated)",
                 f"Experienced leadership team with {exp_years:.0f}+ years in {industry} (KNN factor)",
                 f"Strong traction of {active_users:,} active users at {stage} stage",
             ],
             "weaknesses": [
                 (
-                    f"Burn rate of ${burn_rate:,.0f}/mo requires continuous monitoring (Decision Tree risk: {risk_level})"
+                    f"Burn rate of ₹{(burn_rate * USD_TO_INR):,.0f}/month requires continuous monitoring (Decision Tree risk: {risk_level})"
                     if burn_rate > 0
                     else "Dependency on core product offerings"
                 ),

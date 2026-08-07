@@ -8,6 +8,7 @@ import { GitCompare, Trophy, TrendingUp, ShieldAlert, Sparkles, Building2, Exter
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { startupsAPI } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 export default function ComparePage() {
   const [allStartups, setAllStartups] = useState([]);
@@ -95,7 +96,7 @@ export default function ComparePage() {
   ];
 
   const barData = [
-    { name: 'Revenue ($K/mo)', A: parseRevNum(d1.revenue), B: parseRevNum(d2.revenue) },
+    { name: 'Revenue', A: parseRevNum(d1.revenue), B: parseRevNum(d2.revenue) },
     { name: 'MoM Growth (%)', A: parseGrowthNum(d1.growth), B: parseGrowthNum(d2.growth) },
     { name: 'Team Size', A: d1.team, B: d2.team },
     { name: 'AI Score (%)', A: d1.score, B: d2.score },
@@ -103,9 +104,9 @@ export default function ComparePage() {
 
   const metrics = [
     { label: 'AI Success Score', val1: `${d1.score}%`, val2: `${d2.score}%`, num1: d1.score, num2: d2.score, better: 'higher' },
-    { label: 'Monthly Revenue', val1: d1.revenue, val2: d2.revenue, num1: parseRevNum(d1.revenue), num2: parseRevNum(d2.revenue), better: 'higher' },
+    { label: 'Monthly Revenue', val1: formatCurrency(d1.revenue), val2: formatCurrency(d2.revenue), num1: parseRevNum(d1.revenue), num2: parseRevNum(d2.revenue), better: 'higher' },
     { label: 'MoM Growth Rate', val1: d1.growth, val2: d2.growth, num1: parseGrowthNum(d1.growth), num2: parseGrowthNum(d2.growth), better: 'higher' },
-    { label: 'Estimated Valuation', val1: d1.valuation || 'N/A', val2: d2.valuation || 'N/A', num1: parseValuationNum(d1.valuation), num2: parseValuationNum(d2.valuation), better: 'higher' },
+    { label: 'Estimated Valuation', val1: formatCurrency(d1.valuation, { compact: true }) || 'N/A', val2: formatCurrency(d2.valuation, { compact: true }) || 'N/A', num1: parseValuationNum(d1.valuation), num2: parseValuationNum(d2.valuation), better: 'higher' },
     { label: 'Active Users', val1: d1.active_users ? d1.active_users.toLocaleString() : 'N/A', val2: d2.active_users ? d2.active_users.toLocaleString() : 'N/A', num1: d1.active_users || 0, num2: d2.active_users || 0, better: 'higher' },
     { label: 'Team Size', val1: `${d1.team} members`, val2: `${d2.team} members`, num1: d1.team, num2: d2.team, better: 'context' },
     { label: 'Innovation Score', val1: `${d1.innovation_score || 85}%`, val2: `${d2.innovation_score || 85}%`, num1: d1.innovation_score || 85, num2: d2.innovation_score || 85, better: 'higher' },
@@ -216,7 +217,7 @@ export default function ComparePage() {
                 </div>
                 <div style={{ padding: '10px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--r-sm)' }}>
                   <div style={{ fontSize: '0.68rem', color: 'var(--clr-text-muted)', textTransform: 'uppercase' }}>Revenue</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--clr-success)', marginTop: 2 }}>{d.revenue}</div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--clr-success)', marginTop: 2 }}>{formatCurrency(d.revenue)}</div>
                 </div>
                 <div style={{ padding: '10px 8px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--r-sm)' }}>
                   <div style={{ fontSize: '0.68rem', color: 'var(--clr-text-muted)', textTransform: 'uppercase' }}>Growth</div>

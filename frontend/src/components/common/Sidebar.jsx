@@ -19,7 +19,6 @@ const FOUNDER_NAV = [
   { label: 'My Startup',       to: '/founder/startup',          icon: Rocket },
   { label: 'AI Analysis',      to: '/founder/ai-analysis',      icon: Brain },
   { label: 'Analytics',        to: '/founder/analytics',        icon: TrendingUp },
-  { label: 'AI Video',         to: '/founder/ai-video',         icon: Video },
   { label: 'Bonus Tools',      to: '/founder/bonus-tools',      icon: Wand2 },
   { label: 'Investor Match',   to: '/founder/investor-match',   icon: Handshake },
   { label: 'Connections',      to: '/founder/meetings',         icon: Inbox,    badge: 'MEETINGS_COUNT' },
