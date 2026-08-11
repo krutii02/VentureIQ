@@ -588,6 +588,79 @@ class MeetingRequestView(APIView):
         })
 
 
+class FounderConnectView(APIView):
+    """POST /api/investors/<investor_id>/connect/ — founder sends a connection request to an investor."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        # 1. Ensure the caller is a founder
+        try:
+            profile = request.user.profile
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'Profile not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Get the founder's startup
+        founder_startup = Startup.objects.filter(founder=request.user).first()
+        if not founder_startup:
+            return Response({'error': 'You need to create a startup first'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. Find the Investor record
+        try:
+            investor_record = Investor.objects.get(pk=pk)
+        except Investor.DoesNotExist:
+            return Response({'error': 'Investor not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # 4. The Investor must have a linked User account
+        investor_user = investor_record.user
+        if not investor_user:
+            return Response(
+                {'error': 'This investor is not registered on VentureIQ yet. Message saved as notification only.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        msg = request.data.get('message', '').strip() or 'Founder would like to connect'
+
+        # 5. Create or update a MeetingRequest
+        meeting, created = MeetingRequest.objects.get_or_create(
+            user=investor_user,
+            startup=founder_startup,
+            defaults={'message': msg, 'investor': investor_user}
+        )
+        if not created:
+            # Append as a chat message instead of overwriting
+            Message.objects.create(
+                meeting=meeting,
+                sender=request.user,
+                sender_role='FOUNDER',
+                content=msg,
+            )
+        else:
+            # Also create the first message in the chat thread
+            Message.objects.create(
+                meeting=meeting,
+                sender=request.user,
+                sender_role='FOUNDER',
+                content=msg,
+            )
+
+        # Build response
+        investor_name = f"{investor_user.first_name} {investor_user.last_name}".strip() or investor_user.username
+        firm = investor_record.firm or 'Independent'
+
+        return Response({
+            'success': True,
+            'meeting_id': meeting.id,
+            'message': f'Connection request sent to {investor_name}!',
+            'data': {
+                'id': meeting.id,
+                'investor_name': investor_name,
+                'firm': firm,
+                'startup': founder_startup.name,
+                'status': meeting.status,
+            }
+        })
+
+
 class MeetingListView(APIView):
     """GET /api/meetings/ — returns meeting requests FOR the founder's startup."""
     permission_classes = [permissions.AllowAny]

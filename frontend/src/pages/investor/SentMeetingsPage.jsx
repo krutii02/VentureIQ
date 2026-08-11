@@ -492,7 +492,7 @@ function SentCard({ req }) {
             background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.12)',
             fontSize: '0.83rem', color: 'var(--clr-text-secondary)', lineHeight: 1.55,
           }}>
-            <span style={{ fontWeight: 600, color: 'var(--clr-text)', marginRight: 6 }}>Your pitch:</span>
+            <span style={{ fontWeight: 600, color: 'var(--clr-text)', marginRight: 6 }}>Message:</span>
             {req.message}
           </div>
         </div>

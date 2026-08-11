@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../../utils/currency';
+import { investorsAPI } from '../../services/api';
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 function fmtAmount(val) {
@@ -25,39 +26,27 @@ const PALETTE = ['#6366f1','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#e
 function colorFor(id) { return PALETTE[(parseInt(id, 10) || 0) % PALETTE.length]; }
 
 /* ── Message modal ─────────────────────────────────────────────────── */
-function MessageModal({ to, toEmail, firmName, onClose }) {
+function MessageModal({ to, toEmail, firmName, investorId, onClose }) {
   const [body, setBody] = useState(
     `Hi ${to},\n\nI'm reaching out after discovering ${firmName}'s profile on VentureIQ.\n\nWe would love to connect and share more about our growth metrics and traction.\n\nWould you be open to an introductory call this week?\n\nBest regards!`
   );
   const [sending, setSending] = useState(false);
   const [sent,    setSent]    = useState(false);
 
-  const handle = () => {
+  const handle = async () => {
+    if (!body.trim()) return;
     setSending(true);
-    setTimeout(() => {
-      setSending(false);
+    try {
+      await investorsAPI.connectWithInvestor(investorId, body.trim());
       setSent(true);
-
       toast.success(`Message sent to ${to}! It will reflect in your Connections page.`);
-
-      const newNotif = {
-        id: Date.now(),
-        type: 'founder_message',
-        title: `Message from Founder`,
-        firm: firmName || 'VC Firm',
-        startup: 'QuickRoom',
-        time: 'Just now',
-        unread: true,
-        message: `"${body.slice(0, 90)}..."`
-      };
-      try {
-        const stored = JSON.parse(localStorage.getItem('ventureiq_notifications_investor') || '[]');
-        localStorage.setItem('ventureiq_notifications_investor', JSON.stringify([newNotif, ...stored]));
-        window.dispatchEvent(new Event('ventureiq_notification_added'));
-      } catch {}
-
       setTimeout(onClose, 1000);
-    }, 600);
+    } catch (err) {
+      const errorMsg = err?.response?.data?.error || 'Failed to send message';
+      toast.error(errorMsg);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -361,6 +350,7 @@ export default function InvestorProfilePage() {
           to={displayName}
           toEmail={displayEmail}
           firmName={displayFirm}
+          investorId={investor.id}
           onClose={() => setComposing(false)}
         />
       )}

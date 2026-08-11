@@ -273,17 +273,38 @@ export default function LoginPage() {
     try {
       if (mode === 'login') {
         const user = await login(data.email, data.password, selectedRole);
+        const userRole = (user?.role || selectedRole || 'FOUNDER').toUpperCase();
         const routes = { FOUNDER: '/founder/dashboard', INVESTOR: '/investor/dashboard', ADMIN: '/admin/dashboard' };
+        const defaultRoute = routes[userRole] || '/';
         const from = location.state?.from?.pathname;
-        navigate(from || routes[user.role] || '/');
+
+        let targetRoute = defaultRoute;
+        if (
+          from &&
+          from !== '/unauthorized' &&
+          from !== '/login' &&
+          from !== '/register' &&
+          from !== '/'
+        ) {
+          if (userRole === 'FOUNDER' && from.startsWith('/founder')) {
+            targetRoute = from;
+          } else if (userRole === 'INVESTOR' && from.startsWith('/investor')) {
+            targetRoute = from;
+          } else if (userRole === 'ADMIN' && from.startsWith('/admin')) {
+            targetRoute = from;
+          }
+        }
+
+        window.location.href = targetRoute;
       } else {
         if (data.password !== data.confirmPassword) {
           setAuthErr('Passwords do not match.');
           return;
         }
         const user = await registerUser({ name: data.name, email: data.email, password: data.password, role: selectedRole });
+        const userRole = (user?.role || selectedRole || 'FOUNDER').toUpperCase();
         const routes = { FOUNDER: '/founder/startup', INVESTOR: '/investor/my-profile' };
-        navigate(routes[user.role] || '/');
+        window.location.href = routes[userRole] || '/';
       }
     } catch (e) {
       setAuthErr(e.message);

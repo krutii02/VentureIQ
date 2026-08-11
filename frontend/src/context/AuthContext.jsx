@@ -25,7 +25,11 @@ export function AuthProvider({ children }) {
     const storedUser = localStorage.getItem('ventureiq_user');
     const token = localStorage.getItem('ventureiq_token');
     if (storedUser) {
-      try { setUser(JSON.parse(storedUser)); } catch { localStorage.removeItem('ventureiq_user'); }
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed && parsed.role) parsed.role = parsed.role.toUpperCase();
+        setUser(parsed);
+      } catch { localStorage.removeItem('ventureiq_user'); }
     }
     if (token) {
       profileAPI.get().then(res => {
@@ -33,6 +37,7 @@ export function AuthProvider({ children }) {
           setUser(prev => {
             const updated = {
               ...prev,
+              role: res.data.role ? res.data.role.toUpperCase() : (prev?.role ? prev.role.toUpperCase() : 'FOUNDER'),
               name: res.data.name || prev?.name,
               firm: res.data.firm || prev?.firm,
               company: res.data.company || prev?.company,
@@ -57,6 +62,7 @@ export function AuthProvider({ children }) {
       // Attempt live Django backend login
       const res = await authAPI.login(email, password, role);
       const safeUser = res.data.user;
+      if (safeUser && safeUser.role) safeUser.role = safeUser.role.toUpperCase();
       if (res.data.token) {
         localStorage.setItem('ventureiq_token', res.data.token);
       }
@@ -92,6 +98,7 @@ export function AuthProvider({ children }) {
       }
 
       const { password: _, ...safeUser } = found;
+      if (safeUser && safeUser.role) safeUser.role = safeUser.role.toUpperCase();
       setUser(safeUser);
       localStorage.setItem('ventureiq_user', JSON.stringify(safeUser));
       setLoading(false);
@@ -106,6 +113,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await authAPI.register(data);
       const safeUser = res.data.user;
+      if (safeUser && safeUser.role) safeUser.role = safeUser.role.toUpperCase();
       if (res.data.token) {
         localStorage.setItem('ventureiq_token', res.data.token);
       }

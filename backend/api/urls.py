@@ -5,7 +5,7 @@ from .views import (
     ProfileView,
     StartupListView, StartupDetailView, FounderStartupView,
     BookmarkToggleView, WatchlistListView,
-    MeetingRequestView, MeetingListView, MeetingUpdateView, InvestorMeetingsView, FounderReplyView, InvestorReplyView, MessageListView, SendEmailView,
+    MeetingRequestView, MeetingListView, MeetingUpdateView, InvestorMeetingsView, FounderReplyView, InvestorReplyView, MessageListView, SendEmailView, FounderConnectView,
     MLPredictView, DocumentListView,
     ROICalculatorView, BreakevenCalculatorView, AIGeneratorView,
     InvestorListView,
@@ -54,6 +54,7 @@ urlpatterns = [
 
     # Investors (from CSV)
     path('investors/', InvestorListView.as_view(), name='investor_list'),
+    path('investors/<int:pk>/connect/', FounderConnectView.as_view(), name='founder_connect'),
 
     # Admin
     path('admin/stats/', AdminStatsView.as_view(), name='admin_stats'),

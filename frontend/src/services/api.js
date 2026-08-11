@@ -78,6 +78,7 @@ export const toolsAPI = {
 
 export const investorsAPI = {
   list: (params) => api.get('/investors/', { params }),
+  connectWithInvestor: (investorId, message) => api.post(`/investors/${investorId}/connect/`, { message }),
 };
 
 export const adminAPI = {
