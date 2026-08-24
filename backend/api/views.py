@@ -23,6 +23,168 @@ REJECTED_USER_IDS = set()  # User IDs rejected by Admin
 
 # ── AUTH VIEWS ───────────────────────────────────────────────────────
 
+def send_welcome_email(name: str, email: str, role: str):
+    """Send a beautiful HTML welcome email to a newly registered user."""
+    role_label = 'Founder' if role == 'FOUNDER' else 'Investor'
+    role_color = '#7C3AED' if role == 'FOUNDER' else '#0EA5E9'
+    role_desc = (
+        'pitch your startup to top-tier investors, track meetings, and grow your venture'
+        if role == 'FOUNDER'
+        else 'discover high-potential startups, manage your watchlist, and connect with founders'
+    )
+
+    subject = f'Welcome to VentureIQ, {name}! 🚀'
+
+    html_message = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to VentureIQ</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0F0F1A;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0F0F1A;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:linear-gradient(135deg,#1A1A2E 0%,#16213E 100%);
+                      border-radius:16px;overflow:hidden;
+                      border:1px solid rgba(124,58,237,0.3);
+                      box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#7C3AED 0%,#0EA5E9 100%);
+                       padding:40px 48px;text-align:center;">
+              <h1 style="margin:0;font-size:32px;font-weight:800;color:#ffffff;
+                         letter-spacing:-0.5px;">
+                ⚡ VentureIQ
+              </h1>
+              <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.8);
+                        letter-spacing:2px;text-transform:uppercase;">
+                The AI-Powered Investment Intelligence Platform
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:48px;">
+              <!-- Welcome Badge -->
+              <div style="text-align:center;margin-bottom:32px;">
+                <span style="display:inline-block;background:{role_color};
+                             color:#fff;font-size:12px;font-weight:700;
+                             padding:6px 20px;border-radius:999px;
+                             letter-spacing:1.5px;text-transform:uppercase;">
+                  {role_label} Account
+                </span>
+              </div>
+
+              <!-- Greeting -->
+              <h2 style="margin:0 0 16px;font-size:28px;font-weight:700;
+                         color:#F1F5F9;text-align:center;">
+                Welcome aboard, {name}! 🎉
+              </h2>
+              <p style="margin:0 0 32px;font-size:16px;color:#94A3B8;
+                        text-align:center;line-height:1.7;">
+                Your <strong style="color:#F1F5F9;">{role_label}</strong> account is ready.
+                You can now {role_desc}.
+              </p>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:0 0 32px;"/>
+
+              <!-- What's Next -->
+              <h3 style="margin:0 0 20px;font-size:18px;font-weight:600;color:#F1F5F9;">
+                🚀 What's Next?
+              </h3>
+
+              {'<ul style="margin:0 0 32px;padding:0;list-style:none;"><li style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span style="font-size:20px;">📊</span><span style="font-size:15px;color:#94A3B8;line-height:1.6;"><strong style="color:#F1F5F9;">List your startup</strong> — Add your venture details and get AI-powered match scores.</span></li><li style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span style="font-size:20px;">🤝</span><span style="font-size:15px;color:#94A3B8;line-height:1.6;"><strong style="color:#F1F5F9;">Connect with investors</strong> — Request meetings with top-tier investors in your domain.</span></li><li style="display:flex;align-items:flex-start;gap:12px;"><span style="font-size:20px;">📈</span><span style="font-size:15px;color:#94A3B8;line-height:1.6;"><strong style="color:#F1F5F9;">Track your growth</strong> — Use our ROI and breakeven calculators to plan your path.</span></li></ul>' if role == 'FOUNDER' else '<ul style="margin:0 0 32px;padding:0;list-style:none;"><li style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span style="font-size:20px;">🔍</span><span style="font-size:15px;color:#94A3B8;line-height:1.6;"><strong style="color:#F1F5F9;">Discover startups</strong> — Explore AI-ranked startups that match your investment thesis.</span></li><li style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;"><span style="font-size:20px;">⭐</span><span style="font-size:15px;color:#94A3B8;line-height:1.6;"><strong style="color:#F1F5F9;">Watchlist & compare</strong> — Bookmark startups and compare them side-by-side.</span></li><li style="display:flex;align-items:flex-start;gap:12px;"><span style="font-size:20px;">📅</span><span style="font-size:15px;color:#94A3B8;line-height:1.6;"><strong style="color:#F1F5F9;">Schedule meetings</strong> — Request pitch meetings directly with founders.</span></li></ul>'}
+
+              <!-- CTA Button -->
+              <div style="text-align:center;margin-bottom:40px;">
+                <a href="http://localhost:5173"
+                   style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#0EA5E9);
+                          color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;
+                          padding:16px 48px;border-radius:12px;
+                          box-shadow:0 8px 24px rgba(124,58,237,0.4);">
+                  Go to Dashboard →
+                </a>
+              </div>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin:0 0 32px;"/>
+
+              <!-- Account Info -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="background:rgba(255,255,255,0.04);border-radius:12px;
+                            border:1px solid rgba(255,255,255,0.08);">
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 8px;font-size:12px;color:#64748B;
+                               text-transform:uppercase;letter-spacing:1px;font-weight:600;">
+                      Account Details
+                    </p>
+                    <p style="margin:0 0 4px;font-size:14px;color:#94A3B8;">
+                      <span style="color:#F1F5F9;font-weight:600;">Name:</span> &nbsp;{name}
+                    </p>
+                    <p style="margin:0 0 4px;font-size:14px;color:#94A3B8;">
+                      <span style="color:#F1F5F9;font-weight:600;">Email:</span> &nbsp;{email}
+                    </p>
+                    <p style="margin:0;font-size:14px;color:#94A3B8;">
+                      <span style="color:#F1F5F9;font-weight:600;">Role:</span> &nbsp;{role_label}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:rgba(0,0,0,0.3);padding:24px 48px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:13px;color:#475569;">
+                Need help? Contact us at
+                <a href="mailto:support@ventureiq.com"
+                   style="color:#7C3AED;text-decoration:none;">support@ventureiq.com</a>
+              </p>
+              <p style="margin:0;font-size:12px;color:#334155;">
+                © 2026 VentureIQ · All rights reserved
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+    plain_message = (
+        f"Welcome to VentureIQ, {name}!\n\n"
+        f"Your {role_label} account has been created successfully.\n"
+        f"Email: {email}\n\n"
+        f"You can now {role_desc}.\n\n"
+        "Visit VentureIQ to get started.\n\n"
+        "– The VentureIQ Team"
+    )
+
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=django_settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        logging.info(f"Welcome email sent to {email} ({role_label})")
+    except Exception as exc:
+        logging.error(f"Failed to send welcome email to {email}: {exc}")
+
 
 def sync_unlinked_users():
     """Ensure every registered user (Founder/Investor) has an entry in their respective table."""
@@ -109,6 +271,9 @@ class RegisterView(APIView):
 
         user.last_login = timezone.now()
         user.save(update_fields=['last_login'])
+
+        # Send welcome email to the new user (non-blocking; errors are logged)
+        send_welcome_email(name=name, email=email, role=role)
 
         refresh = RefreshToken.for_user(user)
         return Response({

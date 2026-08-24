@@ -1,7 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { startupsAPI } from '../services/api';
+import { parseAmount } from '../utils/currency';
 
 const StartupContext = createContext(null);
+
+/**
+ * Parse a growth string like "+18%", "18%", "-5%" into a numeric value (e.g. 18, -5).
+ */
+function parseGrowthRate(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  if (typeof val === 'number') return val;
+  const match = String(val).match(/([+-]?\s*\d+\.?\d*)/);
+  return match ? parseFloat(match[1].replace(/\s/g, '')) : 0;
+}
 
 export function StartupProvider({ children }) {
   const [startup, setStartupState] = useState(null);   // null = no startup yet (new founder)
@@ -61,10 +72,12 @@ export function StartupProvider({ children }) {
   };
 
   // Convenience getter — returns numeric revenue for charts
+  // Uses parseAmount (from currency.js) which correctly handles units like L, Cr, M, K, $, ₹
   const startupWithMeta = startup
     ? {
         ...startup,
-        revenue_num: parseFloat(String(startup.revenue || '0').replace(/[^0-9.]/g, '')) || 0,
+        revenue_num: parseAmount(startup.revenue) || 0,
+        growth_num: parseGrowthRate(startup.growth),
         burn_rate: startup.burn_rate || 0,
         team: startup.team_size || 0,
         risk: startup.risk_level || 'Medium',

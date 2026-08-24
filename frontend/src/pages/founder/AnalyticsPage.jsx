@@ -47,6 +47,8 @@ export default function AnalyticsPage() {
   const burnBase = startup.burn_rate || Math.round(revBase * 0.38);
   const usersBase = Number(startup.active_users || 12400);
 
+  const growthPct = startup.growth_num || 0;
+
   const monthlyData = [
     { month:'Jan', revenue: Math.round(revBase * 0.60), users: Math.round(usersBase * 0.65), cac: 165, ltv: 490 },
     { month:'Feb', revenue: Math.round(revBase * 0.68), users: Math.round(usersBase * 0.73), cac: 158, ltv: 510 },
@@ -57,6 +59,16 @@ export default function AnalyticsPage() {
     { month:'Jul', revenue: Math.round(revBase * 0.96), users: Math.round(usersBase * 0.97), cac: 138, ltv: 610 },
     { month:'Aug', revenue: Math.round(revBase * 1.12), users: Math.round(usersBase * 1.00), cac: 134, ltv: 635 },
   ];
+
+  // Compute KPIs from actual monthly data
+  const avgRevenue = Math.round(monthlyData.reduce((s, d) => s + d.revenue, 0) / monthlyData.length);
+  const userGrowthPct = usersBase > 0
+    ? Math.round(((monthlyData[monthlyData.length - 1].users - monthlyData[0].users) / monthlyData[0].users) * 100)
+    : (growthPct || 0);
+  const cacStart = monthlyData[0].cac;
+  const cacEnd = monthlyData[monthlyData.length - 1].cac;
+  const cacImprovement = cacStart > 0 ? Math.round(((cacEnd - cacStart) / cacStart) * 100) : 0;
+  const avgLtvCac = (monthlyData.reduce((s, d) => s + (d.ltv / d.cac), 0) / monthlyData.length).toFixed(1);
 
   const burnData = monthlyData.map(d => ({
     month: d.month,
@@ -70,10 +82,10 @@ export default function AnalyticsPage() {
       {/* KPI Summary */}
       <div className="grid-4" style={{ marginBottom:24 }}>
         {[
-          { label:'Avg Monthly Revenue', value: formatCurrency(59000, { compact: true }), sub:'8-month average', color:'#6366f1' },
-          { label:'User Growth', value:'+51%', sub:'Jan → Aug', color:'#10b981' },
-          { label:'CAC Improvement', value:'-19%', sub:'Cost per acquisition', color:'#f59e0b' },
-          { label:'LTV:CAC Ratio', value:'4.7x', sub:'Industry avg: 3x', color:'#8b5cf6' },
+          { label:'Avg Monthly Revenue', value: formatCurrency(avgRevenue, { compact: true }), sub:'8-month average', color:'#6366f1' },
+          { label:'User Growth', value: `${userGrowthPct >= 0 ? '+' : ''}${userGrowthPct}%`, sub:'Jan → Aug', color:'#10b981' },
+          { label:'CAC Improvement', value: `${cacImprovement}%`, sub:'Cost per acquisition', color:'#f59e0b' },
+          { label:'LTV:CAC Ratio', value: `${avgLtvCac}x`, sub:'Industry avg: 3x', color:'#8b5cf6' },
         ].map(k => (
           <div key={k.label} className="stat-card">
             <div style={{ fontSize:'1.9rem', fontWeight:900, color:k.color, fontFamily:"'Space Grotesk',sans-serif" }}>{k.value}</div>

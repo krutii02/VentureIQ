@@ -96,7 +96,10 @@ export default function FounderDashboard() {
   }, []);
 
   const revBase = startup?.revenue_num || 71000;
+  const growthPct = startup?.growth_num || 0;
   const burnBase = startup?.burn_rate || Math.round(revBase * 0.38);
+  const runwayMonths = burnBase > 0 ? Math.max(1, Math.round((revBase * 12) / burnBase)) : 24;
+  const activeUsers = Number(startup?.active_users || 0);
 
   const revenueData = [
     { month: 'Jan', revenue: Math.round(revBase * 0.60), target: Math.round(revBase * 0.55) },
@@ -186,10 +189,10 @@ export default function FounderDashboard() {
 
       {/* Stats Row */}
       <div className="grid-4" style={{ marginBottom:24 }}>
-        <StatCard icon="💰" label="Monthly Revenue" value={formatCurrency(startup.revenue || 71000, { suffix: '/month' })} change="+14.5%" changeUp gradient="rgba(16,185,129,0.15)" />
-        <StatCard icon="🔥" label="Burn Rate" value={formatCurrency(burnBase, { suffix: '/month', compact: true })} change="-8.2%" changeUp={false} gradient="rgba(239,68,68,0.15)" />
-        <StatCard icon="⏳" label="Runway" value="18 months" change="+2 months" changeUp gradient="rgba(245,158,11,0.15)" />
-        <StatCard icon="👥" label="Active Users" value={Number(startup.active_users || 12400).toLocaleString()} change="+21%" changeUp gradient="rgba(99,102,241,0.15)" />
+        <StatCard icon="💰" label="Monthly Revenue" value={formatCurrency(startup.revenue || revBase, { suffix: '/month' })} change={growthPct !== 0 ? `${growthPct > 0 ? '+' : ''}${growthPct}%` : null} changeUp={growthPct > 0} gradient="rgba(16,185,129,0.15)" />
+        <StatCard icon="🔥" label="Burn Rate" value={formatCurrency(burnBase, { suffix: '/month', compact: true })} change={burnBase > 0 && revBase > 0 ? `${((burnBase / revBase) * 100).toFixed(0)}% of rev` : null} changeUp={false} gradient="rgba(239,68,68,0.15)" />
+        <StatCard icon="⏳" label="Runway" value={`${runwayMonths} months`} change={runwayMonths >= 18 ? 'Healthy' : runwayMonths >= 12 ? 'Moderate' : 'Low'} changeUp={runwayMonths >= 12} gradient="rgba(245,158,11,0.15)" />
+        <StatCard icon="👥" label="Active Users" value={activeUsers.toLocaleString()} change={startup.growth ? startup.growth : null} changeUp={growthPct >= 0} gradient="rgba(99,102,241,0.15)" />
       </div>
 
       {/* Main Grid */}

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Search, Moon, Sun, X, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useNotifications } from '../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { startupsAPI } from '../../services/api';
 import { markMeetingAsOpened } from '../../services/unreadTracker';
@@ -33,6 +34,7 @@ const PAGE_MAP = { FOUNDER: FOUNDER_PAGES, INVESTOR: INVESTOR_PAGES, ADMIN: ADMI
 export default function Topbar({ title, subtitle }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { notifications, unreadCount, markAllRead, markRead, refresh } = useNotifications();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -45,121 +47,29 @@ export default function Topbar({ title, subtitle }) {
   const notifRef = useRef(null);
 
   const [showNotifs, setShowNotifs] = useState(false);
-  const [notifications, setNotifications] = useState([]);
 
-  const loadNotifications = () => {
-    const isInvestor = user?.role === 'INVESTOR';
-
-    if (isInvestor) {
-      try {
-        const storedInv = JSON.parse(localStorage.getItem('ventureiq_notifications_investor') || '[]');
-        const defaultInvestorNotifs = [
-          { id: 101, title: 'Email Inquiry from Founder (QuickRoom)', firm: 'QuickRoom', startup: 'Sequoia Capital', time: '1h ago', unread: true, message: 'Partnership Inquiry: We are building QuickRoom and would love to connect with your team.', type: 'founder_email' },
-          { id: 102, title: 'Meeting Accepted by QuickRoom! 🎉', firm: 'QuickRoom', startup: 'Sequoia Capital', time: '3h ago', unread: false, message: 'QuickRoom accepted your meeting request! Founder will schedule the call.', type: 'meeting_response', status: 'Accepted' }
-        ];
-        setNotifications(storedInv.length > 0 ? storedInv : defaultInvestorNotifs);
-      } catch {
-        setNotifications([]);
-      }
-    } else {
-      // Founder / Admin
-      const defaultFounderNotifs = [
-        { id: 1, title: 'Meeting request from Sarah Investor', firm: 'Sequoia Capital', startup: 'QuickRoom', investor_name: 'Sarah Investor', time: 'Just now', unread: true, status: 'Pending', message: 'Interested in intro call regarding Series A investment.' },
-        { id: 2, title: 'Meeting request from Marcus Webb', firm: 'Y Combinator', startup: 'QuickRoom', investor_name: 'Marcus Webb', time: '1d ago', unread: false, status: 'Accepted', message: 'Interested in learning more about your product roadmap.' },
-        { id: 3, title: 'Profile View', firm: 'Tiger Global', startup: 'QuickRoom', time: '2d ago', unread: false, status: 'Completed', message: 'Viewed your startup profile & pitch deck.' }
-      ];
-
-      try {
-        const stored = JSON.parse(localStorage.getItem('ventureiq_notifications') || '[]');
-        if (stored.length > 0) {
-          const formattedStored = stored.map(s => ({
-            id: s.id,
-            title: s.title || `Meeting request from ${s.investor_name || 'Investor'}`,
-            firm: s.firm || 'Sequoia Capital',
-            startup: s.startup || 'QuickRoom',
-            investor_name: s.investor_name || 'Investor',
-            time: s.time || 'Just now',
-            unread: s.unread !== undefined ? s.unread : true,
-            status: s.status || 'Pending',
-            message: s.message || 'Interested in meeting'
-          }));
-          setNotifications(formattedStored);
-        } else {
-          setNotifications(defaultFounderNotifs);
-        }
-      } catch {
-        setNotifications(defaultFounderNotifs);
-      }
+  const handleAcceptMeeting = async (id) => {
+    markRead(id);
+    const target = notifications.find(n => n.id === id);
+    try {
+      await startupsAPI.updateMeeting(id, 'Accepted');
+      toast.success(`Accepted meeting request from ${target?.investor_name || 'Investor'}!`);
+      refresh();
+    } catch {
+      toast.error('Failed to update meeting status');
     }
   };
 
-  useEffect(() => {
-    loadNotifications();
-    window.addEventListener('ventureiq_notification_added', loadNotifications);
-    return () => window.removeEventListener('ventureiq_notification_added', loadNotifications);
-  }, [user?.role]);
-
-  const handleAcceptMeeting = (id) => {
-    markMeetingAsOpened(id);
+  const handleDeclineMeeting = async (id) => {
+    markRead(id);
     const target = notifications.find(n => n.id === id);
-    const updated = notifications.map(n => n.id === id ? { ...n, status: 'Accepted', unread: false } : n);
-    setNotifications(updated);
-    localStorage.setItem('ventureiq_notifications', JSON.stringify(updated));
-
-    // Notify investor
-    const investorNotif = {
-      id: Date.now(),
-      type: 'meeting_response',
-      title: `Meeting Request Accepted by ${target?.startup || 'Founder'}! 🎉`,
-      firm: target?.startup || 'QuickRoom',
-      startup: target?.firm || 'Sequoia Capital',
-      time: 'Just now',
-      status: 'Accepted',
-      unread: true,
-      message: `${target?.startup || 'Founder'} has accepted your meeting request! The team will reach out to schedule your call.`
-    };
     try {
-      const invStored = JSON.parse(localStorage.getItem('ventureiq_notifications_investor') || '[]');
-      localStorage.setItem('ventureiq_notifications_investor', JSON.stringify([investorNotif, ...invStored]));
-      window.dispatchEvent(new Event('ventureiq_notification_added'));
-    } catch {}
-
-    toast.success(`Accepted meeting request from ${target?.investor_name || 'Investor'}!`);
-  };
-
-  const handleDeclineMeeting = (id) => {
-    markMeetingAsOpened(id);
-    const target = notifications.find(n => n.id === id);
-    const updated = notifications.map(n => n.id === id ? { ...n, status: 'Declined', unread: false } : n);
-    setNotifications(updated);
-    localStorage.setItem('ventureiq_notifications', JSON.stringify(updated));
-
-    // Notify investor
-    const investorNotif = {
-      id: Date.now(),
-      type: 'meeting_response',
-      title: `Meeting Request Declined`,
-      firm: target?.startup || 'QuickRoom',
-      startup: target?.firm || 'Sequoia Capital',
-      time: 'Just now',
-      status: 'Declined',
-      unread: true,
-      message: `${target?.startup || 'Founder'} declined the meeting request at this time.`
-    };
-    try {
-      const invStored = JSON.parse(localStorage.getItem('ventureiq_notifications_investor') || '[]');
-      localStorage.setItem('ventureiq_notifications_investor', JSON.stringify([investorNotif, ...invStored]));
-      window.dispatchEvent(new Event('ventureiq_notification_added'));
-    } catch {}
-
-    toast.error(`Declined meeting request from ${target?.investor_name || 'Investor'}`);
-  };
-
-  const unreadCount = notifications.filter(n => n.unread).length;
-
-  const markAllRead = () => {
-    notifications.forEach(n => markMeetingAsOpened(n.id));
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+      await startupsAPI.updateMeeting(id, 'Declined');
+      toast.error(`Declined meeting request from ${target?.investor_name || 'Investor'}`);
+      refresh();
+    } catch {
+      toast.error('Failed to update meeting status');
+    }
   };
 
   const pages = PAGE_MAP[user?.role] || [];
