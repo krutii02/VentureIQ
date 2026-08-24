@@ -4,7 +4,18 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-&g&g#3sy=4*r-!z*!mq_r7_8j1o60t=29&3bo4=56onu5=tjj&'
+# ── Load .env for local development ──────────────────────────────────
+_env_file = BASE_DIR / '.env'
+if _env_file.exists():
+    with open(_env_file) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                key, _, value = line.partition('=')
+                os.environ.setdefault(key.strip(), value.strip())
+
+# ── Security ──────────────────────────────────────────────────────────
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-only-not-for-production')
 
 DEBUG = True
 
@@ -17,12 +28,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party apps
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-    
+
     # Local apps
     'api',
 ]
@@ -79,7 +90,6 @@ STATICFILES_DIRS = [
     BASE_DIR.parent / 'frontend' / 'dist' / 'assets',
 ]
 
-
 # CORS Configuration
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -105,16 +115,16 @@ SIMPLE_JWT = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── Email Configuration ──────────────────────────────────────────────
+# ── Email Configuration ───────────────────────────────────────────────
 EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', 'ranpariyakruti@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ysslqcxfznufkdxw')
+EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER if EMAIL_HOST_USER else os.environ.get('DEFAULT_FROM_EMAIL', 'VentureIQ <noreply@ventureiq.com>')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'VentureIQ <noreply@ventureiq.com>'
