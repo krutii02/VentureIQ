@@ -1,0 +1,21 @@
+django>=5.0,<6.0
+djangorestframework>=3.15,<4.0
+django-cors-headers>=4.3,<5.0
+djangorestframework-simplejwt>=5.3,<6.0
+
+# ML Engine
+scikit-learn>=1.4,<2.0
+pandas>=2.2,<3.0
+numpy>=1.26,<2.0
+
+# Production server
+gunicorn>=22.0,<23.0
+
+# PostgreSQL (Railway/Render provision this automatically)
+psycopg2-binary>=2.9,<3.0
+
+# Static files for production
+whitenoise>=6.6,<7.0
+
+# Environment variable loading
+python-dotenv>=1.0,<2.0
