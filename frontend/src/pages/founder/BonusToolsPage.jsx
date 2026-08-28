@@ -16,10 +16,10 @@ export default function BonusToolsPage() {
   const { startup } = useStartup();
 
   const [activeTool, setActiveTool] = useState('tagline');
-  const [companyName, setCompanyName] = useState(startup.name || 'QuickRoom');
-  const [industry, setIndustry] = useState(startup.industry || 'Healthcare');
+  const [companyName, setCompanyName] = useState(startup?.name || 'QuickRoom');
+  const [industry, setIndustry] = useState(startup?.industry || 'Healthcare');
   const [targetAudience, setTargetAudience] = useState('Hospitals & diagnostic centers');
-  const [uvp, setUvp] = useState(startup.description || 'AI-powered diagnostic imaging with 98% accuracy at 40% lower cost');
+  const [uvp, setUvp] = useState(startup?.description || 'AI-powered diagnostic imaging with 98% accuracy at 40% lower cost');
 
   useEffect(() => {
     if (startup) {
@@ -32,6 +32,23 @@ export default function BonusToolsPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  if (!startup) {
+    return (
+      <DashboardLayout title="Bonus Tools" subtitle="AI-powered content generation for your startup">
+        <div className="card" style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--clr-text-muted)' }}>
+          <div style={{ fontSize: '3rem', marginBottom: 16 }}>🛠️</div>
+          <h3 style={{ fontWeight: 700, color: 'var(--clr-text-primary)', marginBottom: 8 }}>Set up your Startup Profile</h3>
+          <p style={{ fontSize: '0.85rem', maxWidth: 400, margin: '0 auto 24px', lineHeight: 1.5 }}>
+            You haven't created your startup profile yet. Complete your profile to access AI-powered content generation tools.
+          </p>
+          <button onClick={() => window.location.href = '/founder/startup'} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            Create Startup Profile
+          </button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const getDynamicFallback = (toolKey) => {
     const comp = companyName.trim() || 'QuickRoom';

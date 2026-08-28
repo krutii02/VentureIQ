@@ -1,4 +1,9 @@
 import math, csv, json, os, logging
+import requests as http_requests
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
+from google.auth.transport.urllib3 import Request as UrllibRequest
+import urllib3
 from django.core.mail import send_mail
 from django.conf import settings as django_settings
 from .ml_engine import get_engine as get_ml_engine
@@ -233,6 +238,44 @@ except Exception:
     pass
 
 
+class PlatformStatsView(APIView):
+    """Public endpoint — returns live platform statistics for the auth pages."""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        from django.db.models import Avg
+        founders_count   = UserProfile.objects.filter(role='FOUNDER').count()
+        investors_count  = UserProfile.objects.filter(role='INVESTOR').count()
+        startups_count   = Startup.objects.count()
+        members_count    = founders_count + investors_count
+        industries_count = Startup.objects.values('industry').distinct().count()
+
+        avg_score = Startup.objects.aggregate(avg=Avg('score'))['avg'] or 0
+
+        top_startups = list(
+            Startup.objects.order_by('-score')[:3].values('name', 'stage', 'score', 'industry')
+        )
+
+        # Top 3 investors from seed data only (user=NULL means not user-generated)
+        top_investors = list(
+            Investor.objects.filter(user__isnull=True)
+            .order_by('-total_deals')[:3]
+            .values('name', 'firm', 'industries', 'total_deals')
+        )
+
+        return Response({
+            'founders':        founders_count,
+            'investors':       investors_count,
+            'members':         members_count,
+            'startups':        startups_count,
+            'industries':      industries_count,
+            'avg_score':       round(avg_score),
+            'top_startups':    top_startups,
+            'top_investors':   top_investors,
+        })
+
+
+
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -365,6 +408,135 @@ class PasswordResetView(APIView):
         user.set_password(new_password)
         user.save()
         return Response({'message': 'Password updated successfully. You can now log in.'}, status=status.HTTP_200_OK)
+
+
+class GoogleAuthView(APIView):
+    """Verify a Google ID token and issue a VentureIQ JWT.
+
+    POST body:
+        credential (str) : Google ID token from the GSI popup
+        role       (str) : 'FOUNDER' or 'INVESTOR' — required only for new users
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        credential = request.data.get('credential', '').strip()
+        role = (request.data.get('role', 'FOUNDER') or 'FOUNDER').upper()
+
+        if not credential:
+            return Response({'error': 'Google credential is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        client_id = django_settings.GOOGLE_CLIENT_ID
+        if not client_id:
+            return Response(
+                {'error': 'Google OAuth is not configured on this server.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        # Verify the Google ID token using urllib3 transport (more reliable on Windows)
+        try:
+            # Try urllib3 transport first (avoids requests session issues)
+            try:
+                http = urllib3.PoolManager()
+                request_obj = UrllibRequest(http)
+            except Exception:
+                request_obj = google_requests.Request()
+
+            id_info = google_id_token.verify_oauth2_token(
+                credential,
+                request_obj,
+                client_id,
+                clock_skew_in_seconds=120,
+            )
+        except Exception as exc:
+            logging.error(f"Google token verification failed (client_id={client_id[:20]}...): {type(exc).__name__}: {exc}")
+            return Response({'error': f'Google sign-in failed: {str(exc)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        google_email = id_info.get('email', '').lower().strip()
+        google_name  = id_info.get('name', '') or google_email.split('@')[0]
+        google_sub   = id_info.get('sub', '')  # unique Google user ID
+
+        if not google_email:
+            return Response({'error': 'Could not retrieve email from Google.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ── Find or create the Django User ──────────────────────────────
+        is_new_user = False
+        user = (
+            User.objects.filter(email=google_email).first() or
+            User.objects.filter(username=google_email).first()
+        )
+
+        if user:
+            # Existing user — verify the selected role matches their stored role
+            profile, _ = UserProfile.objects.get_or_create(
+                user=user, defaults={'role': role}
+            )
+            # Reject if the account is locked
+            if not user.is_active:
+                return Response(
+                    {'error': 'Your account has been locked. Please contact support@ventureiq.com.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            # Reject if the selected role doesn't match the stored role
+            if role and profile.role.upper() != role.upper():
+                return Response(
+                    {'error': f'This Google account is registered as a {profile.role.capitalize()}. Please go back and select the correct role to log in.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        else:
+            # New user — validate role
+            if role not in ('FOUNDER', 'INVESTOR'):
+                return Response(
+                    {'error': 'Please select a valid role: Founder or Investor.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            is_new_user = True
+            name_parts = google_name.split(' ', 1)
+            user = User.objects.create_user(
+                username=google_email,
+                email=google_email,
+                password=None,   # No password — Google-only account
+                first_name=name_parts[0],
+                last_name=name_parts[1] if len(name_parts) > 1 else ''
+            )
+            avatar = google_name[:2].upper()
+            profile = UserProfile.objects.create(user=user, role=role, avatar=avatar)
+
+            # Sync to Investor table if needed
+            if role == 'INVESTOR':
+                Investor.objects.create(
+                    user=user,
+                    name=google_name,
+                    email=google_email,
+                    firm='',
+                    investor_type='Venture Capitalist',
+                    verified=True,
+                )
+
+            # Send welcome email (non-blocking)
+            send_welcome_email(name=google_name, email=google_email, role=role)
+
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
+
+        refresh = RefreshToken.for_user(user)
+        full_name = f"{user.first_name} {user.last_name}".strip() or user.username
+        avatar = profile.avatar or full_name[:2].upper()
+
+        return Response({
+            'token': str(refresh.access_token),
+            'refresh': str(refresh),
+            'is_new_user': is_new_user,
+            'user': {
+                'id': user.id,
+                'name': full_name,
+                'email': user.email,
+                'role': profile.role,
+                'avatar': avatar,
+                'company': profile.company,
+                'firm': profile.firm,
+            }
+        }, status=status.HTTP_200_OK)
 
 
 class MeView(APIView):

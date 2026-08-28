@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
-    RegisterView, LoginView, MeView, PasswordResetView,
+    RegisterView, LoginView, MeView, PasswordResetView, GoogleAuthView,
     ProfileView,
     StartupListView, StartupDetailView, FounderStartupView,
     BookmarkToggleView, WatchlistListView,
@@ -11,15 +11,20 @@ from .views import (
     InvestorListView,
     AdminStatsView, AdminUsersView, AdminBanUserView, AdminDeleteUserView,
     AdminApprovalsView, AdminActionApprovalView,
+    PlatformStatsView,
 )
 
 urlpatterns = [
+    # Public stats (no auth)
+    path('platform-stats/', PlatformStatsView.as_view(), name='platform_stats'),
+
     # Auth
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/me/', MeView.as_view(), name='me'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/reset-password/', PasswordResetView.as_view(), name='reset_password'),
+    path('auth/google/', GoogleAuthView.as_view(), name='google_auth'),
 
     # Profile
     path('profile/', ProfileView.as_view(), name='profile'),

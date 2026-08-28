@@ -106,6 +106,31 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const loginWithGoogle = async (credential, role) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await authAPI.googleAuth(credential, role);
+      const safeUser = res.data.user;
+      if (safeUser && safeUser.role) safeUser.role = safeUser.role.toUpperCase();
+      if (res.data.token) {
+        localStorage.setItem('ventureiq_token', res.data.token);
+      }
+      if (res.data.refresh) {
+        localStorage.setItem('ventureiq_refresh', res.data.refresh);
+      }
+      setUser(safeUser);
+      localStorage.setItem('ventureiq_user', JSON.stringify(safeUser));
+      setLoading(false);
+      return safeUser;
+    } catch (apiErr) {
+      setLoading(false);
+      const err = apiErr.response?.data?.error || 'Google sign-in failed. Please try again.';
+      setError(err);
+      throw new Error(err);
+    }
+  };
+
   const register = async (data) => {
     setError(null);
     setLoading(true);
@@ -181,7 +206,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout, setError, updateUser, deleteAccount }}>
+    <AuthContext.Provider value={{ user, loading, error, login, loginWithGoogle, register, logout, setError, updateUser, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

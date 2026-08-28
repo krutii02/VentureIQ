@@ -22,12 +22,12 @@ export default function AIAnalysisPage() {
   const { startup } = useStartup();
 
   const [form, setForm] = useState({
-    industry: startup.industry || 'Healthcare',
-    funding_stage: startup.stage || 'Series A',
-    team_size: startup.team || 24,
-    monthly_revenue_usd: startup.revenue_num || 71000,
-    burn_rate: startup.burn_rate || 28000,
-    active_users: startup.active_users || 12400,
+    industry: startup?.industry || 'Healthcare',
+    funding_stage: startup?.stage || 'Series A',
+    team_size: startup?.team || 24,
+    monthly_revenue_usd: startup?.revenue_num || 71000,
+    burn_rate: startup?.burn_rate || 28000,
+    active_users: startup?.active_users || 12400,
     customer_growth_rate: 21,
     founder_experience_years: 8
   });

@@ -19,6 +19,7 @@ api.interceptors.request.use(config => {
 export const authAPI = {
   login: (email, password, role) => api.post('/auth/login/', { email, password, role }),
   register: (data) => api.post('/auth/register/', data),
+  googleAuth: (credential, role) => api.post('/auth/google/', { credential, role }),
   me: () => api.get('/auth/me/'),
   verifyEmail: (email) => api.post('/auth/reset-password/', { email }),
   resetPassword: (email, new_password) => api.post('/auth/reset-password/', { email, new_password }),
@@ -90,6 +91,8 @@ export const adminAPI = {
   actionApproval: (id, action, notes) => api.post(`/admin/approvals/${id}/action/`, { action, notes }),
 };
 
-
+export const publicAPI = {
+  platformStats: () => api.get('/platform-stats/'),
+};
 
 export default api;

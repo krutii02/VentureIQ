@@ -4,6 +4,7 @@ import { ProtectedRoute, RoleGuard } from './routes/ProtectedRoute';
 
 // Public
 import LandingPage        from './pages/public/LandingPage';
+import RoleSelectPage     from './pages/public/RoleSelectPage';
 import LoginPage          from './pages/public/LoginPage';
 import RegisterPage       from './pages/public/RegisterPage';
 import UnauthorizedPage   from './pages/public/UnauthorizedPage';
@@ -39,8 +40,10 @@ export default function App() {
     <Routes>
       {/* Public */}
       <Route path="/"            element={<LandingPage />} />
-      <Route path="/login"       element={<LoginPage />} />
-      <Route path="/register"    element={<RegisterPage />} />
+      <Route path="/login"       element={<RoleSelectPage />} />
+      <Route path="/login/form"  element={<LoginPage />} />
+      <Route path="/register"    element={<RoleSelectPage />} />
+      <Route path="/register/form" element={<LoginPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       {/* Founder Routes */}

@@ -4,7 +4,7 @@ import {
   Users, RefreshCw, AlertCircle, Eye, Ban, CheckCircle, Trash2,
   MoreVertical, X, Building2, Mail, Calendar, Activity,
   Globe, Link as Linkedin, BadgeCheck, TrendingUp, DollarSign,
-  Briefcase, Zap, Cpu, Award, Target, ChevronRight
+  Briefcase, Zap, Cpu, Award, Target, ChevronRight, Search
 } from 'lucide-react';
 import DashboardLayout from '../../layouts/DashboardLayout';
 import { adminAPI } from '../../services/api';
@@ -145,8 +145,34 @@ export default function AdminUsersPage() {
           </button>
         </div>
 
-        {/* Toggle Pills & Search Bar */}
+        {/* Search Bar (left) & Toggle Pills (right) */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+
+          {/* Search bar with icon */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search size={14} style={{ position: 'absolute', left: 10, color: 'var(--clr-text-muted)', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Search founders, investors, startups or email..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{
+                padding: '7px 12px 7px 30px',
+                borderRadius: 'var(--r-md)',
+                border: '1px solid var(--clr-border)',
+                background: 'var(--clr-bg-secondary)',
+                color: 'var(--clr-text)',
+                fontSize: '0.78rem',
+                outline: 'none',
+                width: 300,
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={e => e.target.style.borderColor = 'var(--clr-accent-1)'}
+              onBlur={e => e.target.style.borderColor = 'var(--clr-border)'}
+            />
+          </div>
+
+          {/* Role filter toggles */}
           <div style={{ display: 'flex', gap: 6, background: 'rgba(255,255,255,0.03)', padding: 4, borderRadius: 'var(--r-md)', border: '1px solid var(--clr-border)' }}>
             {[
               { id: 'ALL', label: 'All Users', count: users.length },
@@ -188,23 +214,6 @@ export default function AdminUsersPage() {
               );
             })}
           </div>
-
-          <input
-            type="text"
-            placeholder="Search founders, investors, startups or email…"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{
-              padding: '7px 12px',
-              borderRadius: 'var(--r-md)',
-              border: '1px solid var(--clr-border)',
-              background: 'var(--clr-bg-secondary)',
-              color: 'var(--clr-text)',
-              fontSize: '0.78rem',
-              outline: 'none',
-              width: 290,
-            }}
-          />
         </div>
 
         {usersLoading ? (

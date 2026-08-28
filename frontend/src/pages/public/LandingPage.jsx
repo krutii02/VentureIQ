@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, Zap, Brain, TrendingUp, Shield, Star, ChevronRight,
@@ -128,7 +128,6 @@ const WORKFLOW = [
 export default function LandingPage() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('founder');
   const [demoTab, setDemoTab] = useState('analytics');
@@ -154,16 +153,8 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      const routes = {
-        FOUNDER: '/founder/dashboard',
-        INVESTOR: '/investor/dashboard',
-        ADMIN: '/admin/dashboard'
-      };
-      navigate(routes[user.role] || '/');
-    }
-  }, [user, navigate]);
+
+
 
   return (
     <div style={{ background: 'var(--clr-bg-primary)', color: 'var(--clr-text)', minHeight: '100vh', overflowX: 'hidden' }}>
