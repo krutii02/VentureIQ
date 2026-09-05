@@ -17,9 +17,12 @@ if _env_file.exists():
 # ── Security ──────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-only-not-for-production')
 
-DEBUG = True
+# Read DEBUG from environment — defaults to False for production safety
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# Allow Railway/Vercel domains plus any custom domain; fallback to '*' for local dev
+_allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_env.split(',') if h.strip()] or ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,6 +44,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise serves static files efficiently in production (place after SecurityMiddleware)
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -68,12 +73,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# ── Database ──────────────────────────────────────────────────────────
+# Use DATABASE_URL env var (PostgreSQL on Railway) if available,
+# otherwise fall back to local SQLite for development.
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator' },
@@ -85,13 +104,22 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# ── Static Files (WhiteNoise) ─────────────────────────────────────────
 STATIC_URL = '/assets/'
-STATICFILES_DIRS = [
-    BASE_DIR.parent / 'frontend' / 'dist' / 'assets',
-]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = []
+# WhiteNoise compressed static file storage for production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+# ── CORS Configuration ────────────────────────────────────────────────
+_cors_origins_env = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if _cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+    CORS_ALLOW_ALL_ORIGINS = False
+else:
+    # Local development: allow all origins
+    CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_CREDENTIALS = True
 
 # REST Framework Configuration

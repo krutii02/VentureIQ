@@ -350,7 +350,15 @@ class LoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        profile, _ = UserProfile.objects.get_or_create(user=user, defaults={'role': role or 'FOUNDER'})
+        # Guard: profile must already exist — never auto-create on login.
+        # If admin deleted a user's profile the Django User record may still exist;
+        # without a profile there is effectively no VentureIQ account.
+        profile = UserProfile.objects.filter(user=user).first()
+        if not profile:
+            return Response(
+                {'error': 'No account found with these credentials. Please register first.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if role and profile.role != role.upper():
             return Response(
@@ -422,6 +430,8 @@ class GoogleAuthView(APIView):
     def post(self, request):
         credential = request.data.get('credential', '').strip()
         role = (request.data.get('role', 'FOUNDER') or 'FOUNDER').upper()
+        # 'login' mode = existing accounts only; 'signup' mode = allow creation
+        mode = request.data.get('mode', 'signup').strip().lower()
 
         if not credential:
             return Response({'error': 'Google credential is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -467,10 +477,18 @@ class GoogleAuthView(APIView):
         )
 
         if user:
-            # Existing user — verify the selected role matches their stored role
-            profile, _ = UserProfile.objects.get_or_create(
-                user=user, defaults={'role': role}
-            )
+            # Existing Django User — but their VentureIQ profile must also exist.
+            # If an admin deleted the profile, the account is gone; reject login.
+            profile = UserProfile.objects.filter(user=user).first()
+            if not profile:
+                # Profile was deleted (e.g., by admin). Treat as deleted account.
+                return Response(
+                    {
+                        'error': 'No VentureIQ account found for this Google account. '
+                                 'Please register first, then sign in.'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
             # Reject if the account is locked
             if not user.is_active:
                 return Response(
@@ -484,7 +502,18 @@ class GoogleAuthView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
         else:
-            # New user — validate role
+            # No existing account found for this Google email.
+            # In LOGIN mode we must reject — account doesn't exist.
+            if mode == 'login':
+                return Response(
+                    {
+                        'error': 'No VentureIQ account found for this Google account. '
+                                 'Please register first, then sign in.'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # SIGNUP mode — create a new account.
             if role not in ('FOUNDER', 'INVESTOR'):
                 return Response(
                     {'error': 'Please select a valid role: Founder or Investor.'},
