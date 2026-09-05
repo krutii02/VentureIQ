@@ -22,14 +22,14 @@ export default function AIAnalysisPage() {
   const { startup } = useStartup();
 
   const [form, setForm] = useState({
-    industry: startup?.industry || 'Healthcare',
-    funding_stage: startup?.stage || 'Series A',
-    team_size: startup?.team || 24,
-    monthly_revenue_usd: startup?.revenue_num || 71000,
-    burn_rate: startup?.burn_rate || 28000,
-    active_users: startup?.active_users || 12400,
-    customer_growth_rate: 21,
-    founder_experience_years: 8
+    industry: startup?.industry || '',
+    funding_stage: startup?.stage || '',
+    team_size: startup?.team || '',
+    monthly_revenue_usd: startup?.revenue_num || '',
+    burn_rate: startup?.burn_rate || '',
+    active_users: startup?.active_users || '',
+    customer_growth_rate: '',
+    founder_experience_years: ''
   });
 
   useEffect(() => {
@@ -38,10 +38,10 @@ export default function AIAnalysisPage() {
         ...p,
         industry: startup.industry || p.industry,
         funding_stage: startup.stage || p.funding_stage,
-        team_size: startup.team || p.team_size,
-        monthly_revenue_usd: startup.revenue_num || p.monthly_revenue_usd,
-        burn_rate: startup.burn_rate || p.burn_rate,
-        active_users: startup.active_users || p.active_users,
+        team_size: startup.team !== undefined && startup.team !== null ? startup.team : p.team_size,
+        monthly_revenue_usd: startup.revenue_num !== undefined && startup.revenue_num !== null ? startup.revenue_num : p.monthly_revenue_usd,
+        burn_rate: startup.burn_rate !== undefined && startup.burn_rate !== null ? startup.burn_rate : p.burn_rate,
+        active_users: startup.active_users !== undefined && startup.active_users !== null ? startup.active_users : p.active_users,
       }));
     }
   }, [startup]);

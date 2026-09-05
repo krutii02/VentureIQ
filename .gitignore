@@ -16,6 +16,13 @@ media/
 # Environment variables — NEVER commit these
 backend/.env
 .env
+frontend/.env
+frontend/.env.production
+frontend/.env.local
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
 
 # OS
 .DS_Store

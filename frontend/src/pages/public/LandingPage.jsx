@@ -278,7 +278,7 @@ export default function LandingPage() {
               background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
               fontSize: '0.82rem', fontWeight: 600, color: '#818cf8', marginBottom: 24
             }}>
-              <Sparkles size={14} /> Next-Gen Venture Intelligence & Matchmaking
+              <Sparkles size={14} /> Next-Gen Venture Intelligence 
             </div>
           </motion.div>
 

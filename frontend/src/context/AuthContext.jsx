@@ -71,21 +71,25 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return safeUser;
     } catch (apiErr) {
-      if (apiErr.response?.status === 403) {
+      // If backend explicitly rejected (400/403/404) — propagate immediately,
+      // do NOT fall through to the offline demo fallback.
+      // This ensures deleted accounts cannot sneak in via localStorage.
+      const httpStatus = apiErr.response?.status;
+      if (httpStatus === 400 || httpStatus === 403 || httpStatus === 404) {
         setLoading(false);
-        const err = apiErr.response?.data?.error || 'Role mismatch.';
+        const err = apiErr.response?.data?.error || 'Invalid credentials.';
         setError(err);
         throw new Error(err);
       }
 
-      // Fallback for offline / demo mode
+      // Fallback only for genuine network / server-down scenarios
       await new Promise(r => setTimeout(r, 600));
       const allUsers = [...DEMO_USERS, ...getRegisteredUsers()];
       const found = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
 
       if (!found) {
         setLoading(false);
-        const err = apiErr.response?.data?.error || 'Invalid email or password.';
+        const err = 'Invalid email or password.';
         setError(err);
         throw new Error(err);
       }
@@ -106,11 +110,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loginWithGoogle = async (credential, role) => {
+  const loginWithGoogle = async (credential, role, mode = 'signup') => {
     setError(null);
     setLoading(true);
     try {
-      const res = await authAPI.googleAuth(credential, role);
+      const res = await authAPI.googleAuth(credential, role, mode);
       const safeUser = res.data.user;
       if (safeUser && safeUser.role) safeUser.role = safeUser.role.toUpperCase();
       if (res.data.token) {
