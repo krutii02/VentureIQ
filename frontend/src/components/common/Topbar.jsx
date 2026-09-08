@@ -119,7 +119,7 @@ export default function Topbar({ title, subtitle }) {
 
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
         {/* Theme Toggle */}
-        <button className="btn btn-icon btn-ghost" onClick={toggleTheme}
+        <button className="btn btn-icon btn-ghost topbar-theme-toggle" onClick={toggleTheme}
           title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           style={{ position:'relative' }}>
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -143,9 +143,9 @@ export default function Topbar({ title, subtitle }) {
           </button>
 
           {showNotifs && (
-            <div style={{
+          <div style={{
               position:'absolute', top:'calc(100% + 8px)', right:0,
-              width:360, background:'var(--clr-bg-card)', border:'1px solid var(--clr-border)',
+              width:'min(360px, calc(100vw - 24px))', background:'var(--clr-bg-card)', border:'1px solid var(--clr-border)',
               borderRadius:'var(--r-md)', boxShadow:'0 10px 30px rgba(0,0,0,0.4)',
               zIndex:300, overflow:'hidden'
             }}>

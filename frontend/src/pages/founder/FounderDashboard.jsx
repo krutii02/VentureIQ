@@ -196,7 +196,7 @@ export default function FounderDashboard() {
       </div>
 
       {/* Main Grid */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:20, marginBottom:20 }}>
+      <div className="dashboard-main-grid">
 
         {/* Revenue Chart */}
         <div className="card">
@@ -281,7 +281,7 @@ export default function FounderDashboard() {
       </div>
 
       {/* Bottom Grid */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20 }}>
+      <div className="dashboard-bottom-grid">
 
         {/* Radar Chart */}
         <div className="card">
