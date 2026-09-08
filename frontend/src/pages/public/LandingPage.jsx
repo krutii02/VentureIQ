@@ -5,7 +5,7 @@ import {
   ArrowRight, Zap, Brain, TrendingUp, Shield, Star, ChevronRight,
   Users, BarChart3, Globe, Sun, Moon, CheckCircle2, Sparkles,
   Building2, Rocket, Lock, Cpu, Calculator, MessageSquare, Mail,
-  ArrowUpRight, Target, Activity, Layers, Play
+  ArrowUpRight, Target, Activity, Layers, Play, Menu, X as XIcon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -132,6 +132,8 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('founder');
   const [demoTab, setDemoTab] = useState('analytics');
   const [activeSection, setActiveSection] = useState('hero');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -153,8 +155,20 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Track window width for mobile detection
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 900);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-
+  // Close mobile menu on scroll
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const close = () => setMobileMenuOpen(false);
+    window.addEventListener('scroll', close, { once: true });
+    return () => window.removeEventListener('scroll', close);
+  }, [mobileMenuOpen]);
 
   return (
     <div style={{ background: 'var(--clr-bg-primary)', color: 'var(--clr-text)', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -173,77 +187,63 @@ export default function LandingPage() {
         }} />
       </div>
 
-      {/* ── Navigation Header ─────────────────────────────────────────── */}
-      <nav className="landing-nav" style={{
+      {/* ── Navigation Header ───────────────────────────────────────────── */}
+      <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-        background: theme === 'dark' ? 'rgba(11,15,25,0.85)' : 'rgba(255,255,255,0.92)',
+        background: theme === 'dark' ? 'rgba(11,15,25,0.9)' : 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(16px)',
         borderBottom: theme === 'dark' ? '1px solid var(--clr-border)' : '1px solid rgba(0,0,0,0.08)',
-        padding: '0 24px', height: 72,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        padding: isMobile ? '0 16px' : '0 32px',
+        height: 68,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        {/* Left Side: Logo + Navigation Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 38, height: 38, borderRadius: 10,
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, color: '#fff', fontSize: '1.1rem',
-              boxShadow: '0 4px 16px rgba(99,102,241,0.4)'
-            }}>
-              V
-            </div>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
-              Venture<span style={{
-                background: 'linear-gradient(135deg, #6366f1, #10b981)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-              }}>IQ</span>
-            </span>
-          </div>
 
-          {/* Section Navigation Buttons */}
+        {/* ── Logo ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 900, color: '#fff', fontSize: '1rem',
+            boxShadow: '0 4px 16px rgba(99,102,241,0.4)'
+          }}>
+            V
+          </div>
+          <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}>
+            Venture<span style={{
+              background: 'linear-gradient(135deg, #6366f1, #10b981)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+            }}>IQ</span>
+          </span>
+        </div>
+
+        {/* ── Desktop Nav Links (centre pill) ── */}
+        {!isMobile && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 4,
-            background: 'rgba(255,255,255,0.03)', padding: 4, borderRadius: 30,
-            border: '1px solid var(--clr-border)'
+            background: 'rgba(255,255,255,0.04)', padding: 4, borderRadius: 30,
+            border: '1px solid var(--clr-border)',
           }}>
             {[
               { id: 'hero', label: 'Home', href: '#hero' },
               { id: 'features', label: 'Features', href: '#features' },
               { id: 'workflow', label: 'Workflow', href: '#workflow' },
               { id: 'testimonials', label: 'Testimonials', href: '#testimonials' },
-              { id: 'about', label: 'About', href: '#about' }
+              { id: 'about', label: 'About', href: '#about' },
             ].map(link => {
               const isActive = activeSection === link.id;
               return (
                 <a
-                  key={link.label}
+                  key={link.id}
                   href={link.href}
                   onClick={() => setActiveSection(link.id)}
                   style={{
                     color: isActive ? '#fff' : 'var(--clr-text-secondary)',
                     textDecoration: 'none',
                     fontSize: '0.82rem', fontWeight: 600, padding: '6px 16px',
-                    borderRadius: 20, transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    background: isActive
-                      ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
-                      : 'transparent',
-                    boxShadow: isActive
-                      ? '0 4px 14px rgba(99,102,241,0.35)'
-                      : 'none',
-                  }}
-                  onMouseEnter={e => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-                      e.currentTarget.style.color = 'var(--clr-text-primary)';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'var(--clr-text-secondary)';
-                    }
+                    borderRadius: 20, transition: 'all 0.2s ease',
+                    background: isActive ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'transparent',
+                    boxShadow: isActive ? '0 4px 14px rgba(99,102,241,0.35)' : 'none',
                   }}
                 >
                   {link.label}
@@ -251,21 +251,124 @@ export default function LandingPage() {
               );
             })}
           </div>
-        </div>
+        )}
 
-        {/* Right Side: Theme Toggle & Auth Buttons */}
+        {/* ── Right side ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+
+          {/* Theme toggle — always visible */}
           <button className="btn btn-icon btn-ghost" onClick={toggleTheme} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Link to="/login" state={{ mode: 'login' }} className="btn btn-secondary btn-sm" style={{ padding: '8px 16px', fontWeight: 600 }}>
-            Login
-          </Link>
-          <Link to="/register" state={{ mode: 'signup' }} className="btn btn-primary btn-sm" style={{ padding: '8px 18px', fontWeight: 600, gap: 6 }}>
-            Get Started <ArrowRight size={14} />
-          </Link>
+
+          {/* Desktop auth buttons */}
+          {!isMobile && (
+            <>
+              <Link to="/login" state={{ mode: 'login' }} className="btn btn-secondary btn-sm" style={{ padding: '8px 18px', fontWeight: 600 }}>
+                Login
+              </Link>
+              <Link to="/register" state={{ mode: 'signup' }} className="btn btn-primary btn-sm" style={{ padding: '8px 18px', fontWeight: 600, gap: 6 }}>
+                Get Started <ArrowRight size={14} />
+              </Link>
+            </>
+          )}
+
+          {/* Hamburger — mobile only, RIGHT side */}
+          {isMobile && (
+            <button
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              aria-label="Toggle navigation menu"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 42, height: 42, borderRadius: 10,
+                background: mobileMenuOpen ? 'rgba(99,102,241,0.18)' : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${mobileMenuOpen ? 'rgba(99,102,241,0.4)' : 'var(--clr-border)'}`,
+                color: 'var(--clr-text-primary)',
+                cursor: 'pointer', transition: 'all 0.2s ease',
+                flexShrink: 0,
+              }}
+            >
+              {mobileMenuOpen ? <XIcon size={20} /> : <Menu size={20} />}
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* ── Mobile Menu Backdrop ──────────────────────────────────────────── */}
+      {isMobile && mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 998,
+            background: 'rgba(0,0,0,0.4)',
+            backdropFilter: 'blur(2px)',
+          }}
+        />
+      )}
+
+      {/* ── Mobile Slide-Down Menu ────────────────────────────────────────── */}
+      {isMobile && mobileMenuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 68, left: 0, right: 0,
+          zIndex: 999,
+          background: theme === 'dark' ? 'rgba(11,15,25,0.98)' : 'rgba(255,255,255,0.98)',
+          borderBottom: '1px solid var(--clr-border)',
+          padding: '12px 16px 20px',
+          display: 'flex', flexDirection: 'column', gap: 6,
+          boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+          animation: 'mobileMenuSlideDown 0.22s ease',
+        }}>
+          {/* Nav links */}
+          {[
+            { id: 'hero', label: '🏠 Home', href: '#hero' },
+            { id: 'features', label: '✨ Features', href: '#features' },
+            { id: 'workflow', label: '⚙️ Workflow', href: '#workflow' },
+            { id: 'testimonials', label: '💬 Testimonials', href: '#testimonials' },
+            { id: 'about', label: '👥 About', href: '#about' },
+          ].map(link => (
+            <a
+              key={link.id}
+              href={link.href}
+              onClick={() => { setActiveSection(link.id); setMobileMenuOpen(false); }}
+              style={{
+                display: 'flex', alignItems: 'center',
+                padding: '13px 16px', borderRadius: 12,
+                color: activeSection === link.id ? '#818cf8' : 'var(--clr-text-secondary)',
+                fontWeight: 600, fontSize: '1rem', textDecoration: 'none',
+                background: activeSection === link.id ? 'rgba(99,102,241,0.12)' : 'transparent',
+                transition: 'all 0.15s',
+                minHeight: 48,
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+
+          {/* Divider */}
+          <div style={{ height: 1, background: 'var(--clr-border)', margin: '6px 0' }} />
+
+          {/* Auth buttons */}
+          <Link
+            to="/login"
+            state={{ mode: 'login' }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="btn btn-secondary"
+            style={{ width: '100%', justifyContent: 'center', fontWeight: 600, height: 48 }}
+          >
+            Login
+          </Link>
+          <Link
+            to="/register"
+            state={{ mode: 'signup' }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="btn btn-primary"
+            style={{ width: '100%', justifyContent: 'center', fontWeight: 600, height: 48, gap: 8 }}
+          >
+            Get Started <ArrowRight size={16} />
+          </Link>
+        </div>
+      )}
 
       {/* ── Hero Section ─────────────────────────────────────────────── */}
       <section id="hero" style={{ position: 'relative', zIndex: 1, paddingTop: 110, paddingBottom: 80 }}>
@@ -588,7 +691,7 @@ export default function LandingPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 36, marginBottom: 40 }}>
 
             {/* Brand column */}
-            <div style={{ gridColumn: 'span 2' }}>
+            <div className="footer-brand-col" style={{ gridColumn: 'span 2' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: '0.85rem' }}>V</div>
                 <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.15rem', color: 'var(--clr-text)' }}>

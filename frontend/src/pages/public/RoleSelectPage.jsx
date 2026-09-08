@@ -190,10 +190,10 @@ export default function RoleSelectPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr', background: 'var(--clr-bg-primary)' }}>
+    <div className="auth-layout">
 
       {/* ── LEFT ── */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '36px 52px', background: 'var(--clr-bg-card)', borderRight: '1px solid var(--clr-border)', overflowY: 'auto', minHeight: '100vh' }}>
+      <div className="auth-left-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '36px 52px', background: 'var(--clr-bg-card)', borderRight: '1px solid var(--clr-border)', overflowY: 'auto', minHeight: '100vh' }}>
 
         {/* Top Header Row with Logo & Home Button */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 20 }}>
@@ -272,7 +272,9 @@ export default function RoleSelectPage() {
       </div>
 
       {/* ── RIGHT ── */}
-      <RightPanel hoveredRole={hovered} stats={stats} />
+      <div className="auth-right-panel">
+        <RightPanel hoveredRole={hovered} stats={stats} />
+      </div>
     </div>
   );
 }

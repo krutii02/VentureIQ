@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, Moon, Sun, X, LogOut } from 'lucide-react';
+import { Bell, Search, Moon, Sun, X, LogOut, Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
@@ -102,9 +102,19 @@ export default function Topbar({ title, subtitle }) {
 
   return (
     <header className="topbar">
-      <div>
-        <h1 style={{ fontSize:'1.1rem', fontWeight:700, lineHeight:1.2 }}>{title}</h1>
-        {subtitle && <p style={{ fontSize:'0.78rem', color:'var(--clr-text-muted)', marginTop:2 }}>{subtitle}</p>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* Hamburger — only shown on mobile via CSS */}
+        <button
+          className="topbar-hamburger"
+          onClick={() => window.dispatchEvent(new Event('ventureiq_toggle_sidebar'))}
+          aria-label="Open navigation menu"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="topbar-title-area">
+          <h1 style={{ fontSize:'1.1rem', fontWeight:700, lineHeight:1.2 }}>{title}</h1>
+          {subtitle && <p style={{ fontSize:'0.78rem', color:'var(--clr-text-muted)', marginTop:2 }}>{subtitle}</p>}
+        </div>
       </div>
 
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>

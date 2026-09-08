@@ -125,6 +125,7 @@ function MeetingPanel({ role, onClose }) {
 
   return (
     <motion.div
+      className="meeting-panel-mobile"
       initial={{ opacity: 0, x: -20, scale: 0.97 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
       exit={{ opacity: 0, x: -20, scale: 0.97 }}
@@ -437,6 +438,16 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  /* Listen for hamburger toggle from Topbar */
+  useEffect(() => {
+    const handler = () => setMobileOpen(prev => !prev);
+    window.addEventListener('ventureiq_toggle_sidebar', handler);
+    return () => window.removeEventListener('ventureiq_toggle_sidebar', handler);
+  }, []);
+
+  const closeMobile = () => setMobileOpen(false);
 
   const navItems = NAV_MAP[user?.role] || [];
 
@@ -534,7 +545,14 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="sidebar">
+      {/* Dark overlay — only visible on mobile when sidebar is open */}
+      <div
+        className={`sidebar-overlay${mobileOpen ? ' visible' : ''}`}
+        onClick={closeMobile}
+        aria-hidden="true"
+      />
+
+      <aside className={`sidebar${mobileOpen ? ' sidebar-mobile-open' : ''}`}>
         {/* Logo */}
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">V</div>
@@ -558,6 +576,7 @@ export default function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                onClick={closeMobile}
                 className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
               >
                 <item.icon className="link-icon" strokeWidth={1.8} />

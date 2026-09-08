@@ -360,7 +360,7 @@ class LoginView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if role and profile.role != role.upper():
+        if role and profile.role.upper() != role.upper():
             return Response(
                 {'error': f'Incorrect role. This account is registered as {profile.role}.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -1687,7 +1687,7 @@ class AdminUsersView(APIView):
         users = []
 
         # 1. Registered User Accounts (Newest created accounts first)
-        profiles = list(UserProfile.objects.select_related('user').exclude(role='Admin'))
+        profiles = list(UserProfile.objects.select_related('user').exclude(role__iexact='ADMIN'))
         profiles.sort(key=lambda p: (p.user.date_joined or p.user.last_login or timezone.now()), reverse=True)
 
         for p in profiles:

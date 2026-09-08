@@ -533,6 +533,215 @@ tbody tr:hover { background: rgba(99,102,241,0.04); }
   .page-header { padding: 16px 16px 0; }
 }
 
+/* ── Mobile Sidebar Drawer ──────────────────────────────────────── */
+/* Sidebar slides off-screen on mobile by default */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 500;
+    box-shadow: 4px 0 32px rgba(0,0,0,0.5);
+  }
+  .sidebar.sidebar-mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Dark overlay behind open sidebar on mobile */
+.sidebar-overlay {
+  display: none;
+}
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 499;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+    backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+/* Hamburger button in Topbar — hidden on desktop */
+.topbar-hamburger {
+  display: none;
+}
+@media (max-width: 768px) {
+  .topbar-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--r-sm);
+    background: transparent;
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-secondary);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    flex-shrink: 0;
+  }
+  .topbar-hamburger:hover {
+    background: rgba(99,102,241,0.1);
+    color: var(--clr-text-primary);
+    border-color: var(--clr-border-hover);
+  }
+  /* Hide page title on very small screens to make room */
+  .topbar-title-area h1 { font-size: 0.95rem; }
+  .topbar-title-area p  { display: none; }
+}
+
+/* ── Auth Pages Mobile ──────────────────────────────────────────── */
+/* Right panel wrapper — stretches child to fill grid cell height */
+.auth-right-panel {
+  display: flex;
+  flex-direction: column;
+}
+/* Make the inner RightPanel div fill the full height of its wrapper */
+.auth-right-panel > * {
+  flex: 1;
+  min-height: 100vh;
+}
+@media (max-width: 768px) {
+  .auth-right-panel {
+    display: none;
+  }
+  /* Stack the grid to single column */
+  .auth-layout {
+    grid-template-columns: 1fr !important;
+  }
+  /* Reduce left panel padding on mobile */
+  .auth-left-panel {
+    padding: 28px 24px !important;
+  }
+}
+
+/* ── Landing Nav Mobile ─────────────────────────────────────────── */
+/* Nav link pill group — hidden on mobile */
+.landing-nav-links {
+  display: flex;
+}
+.landing-nav-hamburger {
+  display: none;
+}
+@media (max-width: 768px) {
+  .landing-nav-links {
+    display: none;
+  }
+  .landing-nav-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-sm);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-primary);
+    cursor: pointer;
+    transition: all var(--t-fast);
+  }
+  .landing-nav-hamburger:hover {
+    background: rgba(99,102,241,0.15);
+    border-color: rgba(99,102,241,0.3);
+  }
+  /* Reduce landing nav padding */
+  .landing-nav {
+    padding: 0 16px !important;
+  }
+  /* Hide auth buttons in nav on mobile (shown in mobile menu) */
+  .landing-nav-auth {
+    display: none;
+  }
+}
+
+/* Mobile slide-down nav menu */
+.landing-mobile-menu {
+  display: none;
+}
+@media (max-width: 768px) {
+  .landing-mobile-menu {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: var(--clr-bg-secondary);
+    border-bottom: 1px solid var(--clr-border);
+    padding: 16px;
+    gap: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    animation: mobileMenuSlideDown 0.22s ease;
+  }
+  .landing-mobile-menu a,
+  .landing-mobile-menu button {
+    min-height: 44px;
+  }
+}
+@keyframes mobileMenuSlideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Meeting Panel Mobile ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Override the fixed left: 232px positioning for mobile */
+  .meeting-panel-mobile {
+    left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-right: none !important;
+  }
+}
+
+/* ── Touch-friendly tap targets ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar-link {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .btn-sm {
+    min-height: 36px;
+  }
+  .btn {
+    min-height: 40px;
+  }
+  .btn-lg {
+    min-height: 48px;
+  }
+}
+
+/* ── Landing Page Mobile Section Padding ────────────────────────── */
+@media (max-width: 768px) {
+  /* Reduce hero top padding since navbar is 72px */
+  #hero { padding-top: 90px !important; padding-bottom: 48px !important; }
+  /* Reduce section padding */
+  #features, #workflow, #testimonials, #about {
+    padding-top: 56px !important;
+    padding-bottom: 56px !important;
+  }
+  /* Footer brand column should not span 2 on mobile */
+  .footer-brand-col {
+    grid-column: span 1 !important;
+  }
+}
+
+/* ── General Mobile Utility ─────────────────────────────────────── */
+@media (max-width: 480px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+  .page-body { padding: 12px; }
+  .card { padding: 16px; }
+}
+
 /* ── Input with icon ─────────────────────────────────────────────── */
 .input-icon-wrap { position: relative; }
 .input-icon-wrap .form-input { padding-left: 40px; }
@@ -622,6 +831,7 @@ tbody tr:hover { background: rgba(99,102,241,0.04); }
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  background: var(--clr-bg-primary);
 }
 @media (max-width: 768px) {
   .auth-layout { grid-template-columns: 1fr; }

@@ -266,15 +266,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      background: 'var(--clr-bg-primary)',
-    }}>
+    <div className="auth-layout">
 
       {/* ── LEFT: Form panel ── */}
-      <div style={{
+      <div className="auth-left-panel" style={{
         display: 'flex', flexDirection: 'column',
         justifyContent: 'space-between',
         padding: '36px 52px',
@@ -430,7 +425,9 @@ export default function LoginPage() {
       </div>
 
       {/* ── RIGHT: Brand visual ── */}
-      <RightPanel mode={mode} stats={stats} />
+      <div className="auth-right-panel">
+        <RightPanel mode={mode} stats={stats} />
+      </div>
     </div>
   );
 }

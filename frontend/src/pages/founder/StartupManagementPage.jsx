@@ -152,8 +152,25 @@ export default function StartupManagementPage() {
       toast.success('🚀 Startup profile created!');
       navigate('/founder/dashboard');
     } catch (err) {
-      const msg = err?.response?.data?.error || 'Failed to create startup. Please try again.';
-      toast.error(msg);
+      // Backend may return { error: '...' } or a serializer dict { field: ['msg'] }
+      const data = err?.response?.data;
+      let msg = 'Failed to create startup. Please try again.';
+      if (data) {
+        if (typeof data.error === 'string') {
+          msg = data.error;
+        } else if (typeof data === 'object') {
+          // Flatten all serializer field errors into one message
+          const fieldErrors = Object.entries(data)
+            .map(([field, errs]) => `${field}: ${Array.isArray(errs) ? errs.join(', ') : errs}`)
+            .join(' | ');
+          if (fieldErrors) msg = fieldErrors;
+        }
+      } else if (err?.message) {
+        msg = err.message.includes('401') || err.message.includes('Unauthorized')
+          ? 'Session expired. Please log out and log back in.'
+          : err.message;
+      }
+      toast.error(msg, { duration: 6000 });
     } finally {
       setSaving(false);
     }
@@ -174,8 +191,19 @@ export default function StartupManagementPage() {
       await loadStartup();
       setIsEditing(false);
       toast.success('Startup profile updated!');
-    } catch {
-      toast.error('Failed to save changes');
+    } catch (err) {
+      const data = err?.response?.data;
+      let msg = 'Failed to save changes. Please try again.';
+      if (data) {
+        if (typeof data.error === 'string') msg = data.error;
+        else if (typeof data === 'object') {
+          const fieldErrors = Object.entries(data)
+            .map(([f, e]) => `${f}: ${Array.isArray(e) ? e.join(', ') : e}`)
+            .join(' | ');
+          if (fieldErrors) msg = fieldErrors;
+        }
+      }
+      toast.error(msg, { duration: 6000 });
     } finally {
       setSaving(false);
     }

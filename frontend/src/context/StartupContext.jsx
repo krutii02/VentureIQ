@@ -53,22 +53,14 @@ export function StartupProvider({ children }) {
    * Normalises the revenue and burn_rate fields for backward-compat.
    */
   const updateStartup = async (newData) => {
-    try {
-      const res = await startupsAPI.saveMyStartup(newData);
-      const saved = res.data;
-      setStartupState(saved);
-      // Keep localStorage copy as offline fallback
-      localStorage.setItem('ventureiq_founder_startup', JSON.stringify(saved));
-      // Re-fetch from backend to ensure full data (including computed fields)
-      await loadStartup();
-      return saved;
-    } catch (err) {
-      // Offline fallback — save locally only
-      const updated = { ...startup, ...newData };
-      setStartupState(updated);
-      localStorage.setItem('ventureiq_founder_startup', JSON.stringify(updated));
-      return updated;
-    }
+    const res = await startupsAPI.saveMyStartup(newData);
+    const saved = res.data;
+    setStartupState(saved);
+    // Keep localStorage copy as offline fallback
+    localStorage.setItem('ventureiq_founder_startup', JSON.stringify(saved));
+    // Re-fetch from backend to ensure full data (including computed fields)
+    await loadStartup();
+    return saved;
   };
 
   // Convenience getter — returns numeric revenue for charts
