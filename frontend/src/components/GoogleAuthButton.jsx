@@ -4,101 +4,97 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 /**
  * GoogleAuthButton
- *
- * Props:
- *   onCredential(credential: string) — called with the raw Google ID token
- *   label?  — button label text
- *   disabled? — disables the button
+ * Custom dark glassmorphism button with a transparent native GSI overlay.
+ * Maintains 100% of VentureIQ's sleek visual design while satisfying
+ * mobile browser (iOS Safari / Android Chrome) strict user-gesture popup requirements.
  */
 export default function GoogleAuthButton({ onCredential, label = 'Continue with Google', disabled = false }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr]         = useState('');
-  const scriptLoaded          = useRef(false);
+  const overlayRef            = useRef(null);
 
-  /* ── Load the Google Identity Services script once ── */
   useEffect(() => {
-    if (scriptLoaded.current || document.getElementById('google-gsi-script')) {
-      scriptLoaded.current = true;
-      return;
-    }
-    const script = document.createElement('script');
-    script.id    = 'google-gsi-script';
-    script.src   = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-    scriptLoaded.current = true;
-  }, []);
-
-  const handleClick = () => {
-    setErr('');
-
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith('your-google')) {
-      setErr('Google Client ID is not configured. Please add VITE_GOOGLE_CLIENT_ID to your .env file.');
+      setErr('Google Client ID is not configured.');
       return;
     }
 
-    if (!window.google?.accounts?.id) {
-      setErr('Google Sign-In script is still loading. Please try again in a moment.');
-      return;
-    }
-
-    setLoading(true);
-
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: (response) => {
-        setLoading(false);
-        if (response.credential) {
-          onCredential(response.credential);
-        } else {
-          setErr('Google sign-in was cancelled or failed.');
-        }
-      },
-      cancel_on_tap_outside: true,
-    });
-
-    window.google.accounts.id.prompt((notification) => {
-      // Prompt closed without selecting an account — fall back to popup
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        // Use the FedCM / popup path
-        const client = window.google.accounts.oauth2?.initTokenClient?.({
+    const initGsi = () => {
+      if (!window.google?.accounts?.id || !overlayRef.current) return;
+      try {
+        window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          scope: 'email profile openid',
-          callback: () => {},
+          callback: (response) => {
+            setLoading(false);
+            if (response.credential) {
+              onCredential(response.credential);
+            } else {
+              setErr('Google sign-in was cancelled or failed.');
+            }
+          },
+          auto_select: false,
+          cancel_on_tap_outside: true,
         });
 
-        // Directly render a hidden div button and click it as popup trigger
-        const popupDiv = document.getElementById('_gsi_popup_target');
-        if (popupDiv) {
-          window.google.accounts.id.renderButton(popupDiv, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-          });
-          const btn = popupDiv.querySelector('[role=button]') || popupDiv.firstElementChild;
-          if (btn) btn.click();
-        }
-        setLoading(false);
+        overlayRef.current.innerHTML = '';
+        const width = overlayRef.current.offsetWidth || 340;
+        window.google.accounts.id.renderButton(overlayRef.current, {
+          type: 'standard',
+          size: 'large',
+          width: width,
+        });
+      } catch (e) {
+        console.error('Google GSI overlay error:', e);
+      }
+    };
+
+    if (window.google?.accounts?.id) {
+      initGsi();
+    } else {
+      const existing = document.getElementById('google-gsi-script');
+      if (!existing) {
+        const script = document.createElement('script');
+        script.id    = 'google-gsi-script';
+        script.src   = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => setTimeout(initGsi, 100);
+        document.head.appendChild(script);
+      } else {
+        const timer = setInterval(() => {
+          if (window.google?.accounts?.id) {
+            clearInterval(timer);
+            initGsi();
+          }
+        }, 150);
+        return () => clearInterval(timer);
+      }
+    }
+  }, [onCredential]);
+
+  const handleFallbackClick = () => {
+    if (disabled || loading) return;
+    setErr('');
+    if (!window.google?.accounts?.id) {
+      setErr('Google Sign-In is still loading. Please try again in a moment.');
+      return;
+    }
+    setLoading(true);
+    window.google.accounts.id.prompt((notification) => {
+      setLoading(false);
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        setErr('Google sign-in prompt was suppressed. Please ensure popups and third-party cookies are allowed.');
       }
     });
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {/* Hidden GSI popup target */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, position: 'relative', width: '100%' }}>
+      {/* Outer Button maintaining exact custom dark styling */}
       <div
-        id="_gsi_popup_target"
-        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', top: 0, left: 0 }}
-        aria-hidden="true"
-      />
-
-      <button
-        type="button"
-        id="google-auth-btn"
-        onClick={handleClick}
-        disabled={disabled || loading}
+        onClick={handleFallbackClick}
         style={{
+          position: 'relative',
           width: '100%',
           height: 46,
           display: 'flex',
@@ -116,7 +112,6 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
           opacity: disabled ? 0.5 : 1,
           fontFamily: 'inherit',
           letterSpacing: '0.01em',
-          position: 'relative',
           overflow: 'hidden',
         }}
         onMouseEnter={e => {
@@ -134,6 +129,25 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
           e.currentTarget.style.boxShadow = 'none';
         }}
       >
+        {/* Transparent native GSI button overlay for seamless mobile touch */}
+        <div
+          ref={overlayRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            opacity: 0.001,
+            zIndex: 5,
+            cursor: 'pointer',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        />
+
         {loading ? (
           <>
             <span style={{
@@ -159,7 +173,7 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
             {label}
           </>
         )}
-      </button>
+      </div>
 
       {err && (
         <div style={{

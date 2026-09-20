@@ -227,8 +227,10 @@ export default function LoginPage() {
   const onSubmit = async (data) => {
     setAuthErr('');
     try {
+      const email = (data.email || '').trim();
+      const password = (data.password || '').trim();
       if (mode === 'login') {
-        const user = await login(data.email, data.password, selectedRole);
+        const user = await login(email, password, selectedRole);
         const userRole = (user?.role || selectedRole).toUpperCase();
         const routes = { FOUNDER: '/founder/dashboard', INVESTOR: '/investor/dashboard', ADMIN: '/admin/dashboard' };
         const defaultRoute = routes[userRole] || '/';
@@ -241,8 +243,8 @@ export default function LoginPage() {
         }
         window.location.href = targetRoute;
       } else {
-        if (data.password !== data.confirmPassword) { setAuthErr('Passwords do not match.'); return; }
-        const user = await registerUser({ name: data.name, email: data.email, password: data.password, role: selectedRole });
+        if (password !== data.confirmPassword?.trim()) { setAuthErr('Passwords do not match.'); return; }
+        const user = await registerUser({ name: data.name?.trim(), email, password, role: selectedRole });
         const userRole = (user?.role || selectedRole).toUpperCase();
         const routes = { FOUNDER: '/founder/startup', INVESTOR: '/investor/my-profile' };
         window.location.href = routes[userRole] || '/';
@@ -356,7 +358,10 @@ export default function LoginPage() {
                   <div className="input-icon-wrap">
                     <Mail size={14} className="input-icon" />
                     <input type="email" className={`form-input ${errors.email ? 'error' : ''}`} placeholder="you@example.com"
-                      autoComplete="off"
+                      autoComplete="email"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
                       {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email' } })} />
                   </div>
                   {errors.email && <span className="form-error">{errors.email.message}</span>}
@@ -369,7 +374,10 @@ export default function LoginPage() {
                   <div className="input-icon-wrap" style={{ position: 'relative' }}>
                     <Lock size={14} className="input-icon" />
                     <input type={showPw ? 'text' : 'password'} className={`form-input ${errors.password ? 'error' : ''}`}
-                      placeholder="••••••••" style={{ paddingRight: 40 }} autoComplete="new-password"
+                      placeholder="••••••••" style={{ paddingRight: 40 }} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
                       {...register('password', { required: 'Password is required', minLength: { value: mode === 'signup' ? 8 : 6, message: `Min ${mode === 'signup' ? 8 : 6} characters` } })} />
                     <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--clr-text-muted)', cursor: 'pointer', padding: 0, display: 'flex' }}>
                       {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -384,6 +392,9 @@ export default function LoginPage() {
                       <Lock size={14} className="input-icon" />
                       <input type={showCPw ? 'text' : 'password'} className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                         placeholder="••••••••" style={{ paddingRight: 40 }} autoComplete="new-password"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck="false"
                         {...register('confirmPassword', { required: 'Required', validate: v => v === watch('password') || 'Passwords do not match' })} />
                       <button type="button" onClick={() => setShowCPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--clr-text-muted)', cursor: 'pointer', padding: 0, display: 'flex' }}>
                         {showCPw ? <EyeOff size={16} /> : <Eye size={16} />}

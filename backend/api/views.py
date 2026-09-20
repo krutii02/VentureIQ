@@ -1623,27 +1623,34 @@ class AdminStatsView(APIView):
     def get(self, request):
         # Only allow admins
         profile = getattr(request.user, 'profile', None)
-        if not profile or profile.role.upper() not in ('ADMIN',):
+        is_admin = (
+            (profile and profile.role.upper() == 'ADMIN') or
+            getattr(request.user, 'is_staff', False) or
+            getattr(request.user, 'is_superuser', False)
+        )
+        if not is_admin:
             return Response({'error': 'Forbidden'}, status=403)
 
-        from django.db.models import Avg, Count
-        total_founders = UserProfile.objects.filter(role='FOUNDER').count()
+        from django.db.models import Count as DCount
+        total_founders = UserProfile.objects.filter(role__iexact='FOUNDER').count()
         total_investors = Investor.objects.count()
-        total_startups = Startup.objects.count()
-        total_users = total_startups + total_investors
         total_meetings = MeetingRequest.objects.count()
-        accepted_meetings = MeetingRequest.objects.filter(status='Accepted').count()
-        avg_score = Startup.objects.aggregate(avg=Avg('score'))['avg'] or 0
+        accepted_meetings = MeetingRequest.objects.filter(status__iexact='Accepted').count()
 
-        # Score distribution
+        # Optimize: Fetch startup scores in a single query to eliminate latency on cloud DBs
+        scores = list(Startup.objects.values_list('score', flat=True))
+        total_startups = len(scores)
+        total_users = total_startups + total_investors
+        avg_score = (sum(scores) / total_startups) if total_startups > 0 else 0
+
+        # Score distribution computed in-memory
         score_dist = []
         ranges = [(0, 40), (40, 60), (60, 70), (70, 80), (80, 90), (90, 100)]
         for lo, hi in ranges:
-            cnt = Startup.objects.filter(score__gte=lo, score__lt=hi).count()
+            cnt = sum(1 for s in scores if lo <= s < hi)
             score_dist.append({'range': f'{lo}-{hi}', 'count': cnt})
 
         # Industry breakdown
-        from django.db.models import Count as DCount
         industry_qs = (Startup.objects
                        .values('industry')
                        .annotate(value=DCount('id'))
