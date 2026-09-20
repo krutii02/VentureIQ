@@ -363,9 +363,10 @@ class LoginView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if role and profile.role.upper() != role.upper():
+        # Guard: prevent non-admins from claiming admin privileges
+        if role and role.upper() == 'ADMIN' and profile.role.upper() != 'ADMIN':
             return Response(
-                {'error': f'Incorrect role. This account is registered as {profile.role}.'},
+                {'error': 'Unauthorized: This account does not have Admin privileges.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -500,12 +501,8 @@ class GoogleAuthView(APIView):
                     {'error': 'Your account has been locked. Please contact support@ventureiq.com.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-            # Reject if the selected role doesn't match the stored role
-            if role and profile.role.upper() != role.upper():
-                return Response(
-                    {'error': f'This Google account is registered as a {profile.role.capitalize()}. Please go back and select the correct role to log in.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+            # For existing users, use their established account role
+            role = profile.role
         else:
             # No existing account found for this Google email.
             # Seamlessly create a new account with the requested or default role.

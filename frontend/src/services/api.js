@@ -1,6 +1,19 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// Dynamically resolve API URL:
+// - On localhost/127.0.0.1: use '/api' if served on port 8000 (same-origin, 0 CORS), or 'http://localhost:8000/api' if on Vite (port 5173 etc.)
+// - In production: use VITE_API_URL or relative '/api'
+const getApiBase = () => {
+  if (typeof window !== 'undefined') {
+    const { hostname, port } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return port === '8000' ? '/api' : 'http://localhost:8000/api';
+    }
+  }
+  return import.meta.env.VITE_API_URL || '/api';
+};
+
+const API_BASE = getApiBase();
 
 const api = axios.create({
   baseURL: API_BASE,
