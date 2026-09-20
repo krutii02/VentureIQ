@@ -240,6 +240,7 @@ except Exception:
 
 class PlatformStatsView(APIView):
     """Public endpoint — returns live platform statistics for the auth pages."""
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
@@ -277,6 +278,7 @@ class PlatformStatsView(APIView):
 
 
 class RegisterView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -333,6 +335,7 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -389,6 +392,7 @@ class LoginView(APIView):
 
 
 class PasswordResetView(APIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -425,6 +429,7 @@ class GoogleAuthView(APIView):
         credential (str) : Google ID token from the GSI popup
         role       (str) : 'FOUNDER' or 'INVESTOR' — required only for new users
     """
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -503,22 +508,9 @@ class GoogleAuthView(APIView):
                 )
         else:
             # No existing account found for this Google email.
-            # In LOGIN mode we must reject — account doesn't exist.
-            if mode == 'login':
-                return Response(
-                    {
-                        'error': 'No VentureIQ account found for this Google account. '
-                                 'Please register first, then sign in.'
-                    },
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
-            # SIGNUP mode — create a new account.
+            # Seamlessly create a new account with the requested or default role.
             if role not in ('FOUNDER', 'INVESTOR'):
-                return Response(
-                    {'error': 'Please select a valid role: Founder or Investor.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                role = 'FOUNDER'
             is_new_user = True
             name_parts = google_name.split(' ', 1)
             user = User.objects.create_user(

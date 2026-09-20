@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Revenue + Users */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+      <div className="grid-2" style={{ marginBottom: 20 }}>
         <div className="card">
           <div style={{ marginBottom:16 }}>
             <h3 style={{ fontWeight:700, fontSize:'0.95rem' }}>Monthly Revenue — {startup.name}</h3>
@@ -137,7 +137,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Burn Rate + CAC/LTV */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
+      <div className="grid-2" style={{ marginBottom: 20 }}>
         <div className="card">
           <div style={{ marginBottom:16 }}>
             <h3 style={{ fontWeight:700, fontSize:'0.95rem' }}>Revenue vs Burn Rate</h3>
@@ -176,10 +176,13 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Metrics Table */}
-      <div className="card">
-        <h3 style={{ fontWeight:700, marginBottom:16 }}>Detailed Monthly Breakdown</h3>
-        <div className="table-wrap">
-          <table>
+      <div className="card" style={{ minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+          <h3 style={{ fontWeight:700 }}>Detailed Monthly Breakdown</h3>
+          <span style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>Scroll table horizontally →</span>
+        </div>
+        <div className="table-wrap" style={{ display: 'block', width: '100%', maxWidth: '100%', overflowX: 'auto' }}>
+          <table style={{ minWidth: 620 }}>
             <thead>
               <tr>
                 <th>Month</th>

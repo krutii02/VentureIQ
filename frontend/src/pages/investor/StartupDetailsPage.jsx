@@ -377,7 +377,7 @@ export default function StartupDetailsPage() {
       </div>
 
       {/* Details Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20 }}>
+      <div className="responsive-split-main">
         {/* Revenue Trajectory & AI Breakdown */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* Revenue Chart */}
@@ -409,7 +409,7 @@ export default function StartupDetailsPage() {
           {/* AI Score Decomposition */}
           <div className="card">
             <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 16 }}>AI Rating Decomposition</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+            <div className="grid-3" style={{ gap: 14 }}>
               {[
                 { label: 'Innovation Score', score: startup.innovation_score || 84, color: '#6366f1' },
                 { label: 'Investor Interest', score: startup.investor_interest_score || 88, color: 'var(--clr-success)' },

@@ -141,7 +141,7 @@ export default function InvestorDashboard() {
       </div>
 
       {/* Top Startups + Alerts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, marginBottom: 20 }}>
+      <div className="dashboard-main-grid">
 
         {/* Top Startups Table */}
         <div className="card">
@@ -225,7 +225,7 @@ export default function InvestorDashboard() {
       </div>
 
       {/* Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div className="dashboard-bottom-grid">
         {/* Industry Bar Chart */}
         <div className="card">
           <h3 style={{ fontWeight: 700, marginBottom: 4, fontSize: '0.95rem' }}>Startups by Sector</h3>

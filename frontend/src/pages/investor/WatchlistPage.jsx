@@ -66,7 +66,7 @@ export default function WatchlistPage() {
           <p style={{ fontWeight: 600 }}>Loading watchlist...</p>
         </div>
       ) : watchlist.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(330px,1fr))', gap: 18 }}>
+        <div className="responsive-card-grid">
           <AnimatePresence>
             {watchlist.map((w, i) => {
               const s = w.startup;

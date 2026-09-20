@@ -129,7 +129,7 @@ export function AuthProvider({ children }) {
       return safeUser;
     } catch (apiErr) {
       setLoading(false);
-      const err = apiErr.response?.data?.error || 'Google sign-in failed. Please try again.';
+      const err = apiErr.response?.data?.error || apiErr.response?.data?.detail || 'Google sign-in failed. Please try again.';
       setError(err);
       throw new Error(err);
     }

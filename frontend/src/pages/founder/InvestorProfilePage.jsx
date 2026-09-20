@@ -213,7 +213,7 @@ export default function InvestorProfilePage() {
           </div>
 
           {/* Main grid */}
-          <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:20 }}>
+          <div className="responsive-split-main">
 
             {/* Left column */}
             <div style={{ display:'flex', flexDirection:'column', gap:20 }}>

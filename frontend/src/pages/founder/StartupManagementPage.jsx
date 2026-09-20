@@ -444,7 +444,7 @@ export default function StartupManagementPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20 }}>
+      <div className="responsive-split-main">
 
         {/* ── Form ── */}
         <div className="card">

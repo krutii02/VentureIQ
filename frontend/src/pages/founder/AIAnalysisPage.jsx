@@ -177,7 +177,7 @@ export default function AIAnalysisPage() {
     <DashboardLayout title="AI Analysis Engine" subtitle="Machine learning predictions and AI-powered business insights">
 
       {/* Tab Bar */}
-      <div style={{ display:'flex', gap:4, background:'var(--clr-bg-card)', borderRadius:'var(--r-md)', padding:4, width:'fit-content', marginBottom:24, border:'1px solid var(--clr-border)' }}>
+      <div className="tab-pill-group">
         {[
           { id:'predict', label:'🤖 Predictions' },
           { id:'swot', label:'💡 SWOT Analysis' },
@@ -196,7 +196,7 @@ export default function AIAnalysisPage() {
         {/* ML Prediction Tab */}
         {activeTab === 'predict' && (
           <motion.div key="predict" initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }}>
-            <div style={{ display:'grid', gridTemplateColumns:'380px 1fr', gap:24 }}>
+            <div className="responsive-split-form">
               {/* Input Form */}
               <div className="card">
                 <h3 style={{ fontWeight:700, marginBottom:4 }}>Startup Metrics Inputs</h3>
@@ -246,7 +246,7 @@ export default function AIAnalysisPage() {
                 {result && !loading && (
                   <motion.div initial={{ opacity:0, scale:0.96 }} animate={{ opacity:1, scale:1 }} style={{ display:'flex', flexDirection:'column', gap:16 }}>
                     {/* Score Cards */}
-                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14 }}>
+                    <div className="grid-3" style={{ marginBottom: 16 }}>
                       {[
                         { label:'Success Probability', value:`${result.success_probability}%`, color: result.success_probability >= 80 ? 'var(--clr-success)' : result.success_probability >= 68 ? 'var(--clr-accent-1)' : 'var(--clr-warning)', icon:'🎯' },
                         { label:'Investor Interest', value:`${result.investor_interest_score}/100`, color:'var(--clr-success)', icon:'📈' },
@@ -261,7 +261,7 @@ export default function AIAnalysisPage() {
                     </div>
 
                     {/* 12-Month Revenue */}
-                    <div className="card" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                    <div className="card" style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
                       <div>
                         <div style={{ fontSize:'0.75rem', color:'var(--clr-text-muted)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em' }}>Projected 12-Month Revenue</div>
                         <div style={{ fontSize:'2rem', fontWeight:900, color:'var(--clr-success)', fontFamily:"'Space Grotesk',sans-serif", marginTop:4 }}>
@@ -277,7 +277,7 @@ export default function AIAnalysisPage() {
                       {result.insights.map((ins,i) => (
                         <div key={i} style={{ display:'flex', gap:10, marginBottom:10 }}>
                           <CheckCircle size={15} color="var(--clr-success)" style={{ flexShrink:0, marginTop:2 }} />
-                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>{String(ins).replace(/\$/g, '₹')}</span>
+                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5, wordBreak:'break-word' }}>{String(ins).replace(/\$/g, '₹')}</span>
                         </div>
                       ))}
                     </div>
@@ -288,35 +288,35 @@ export default function AIAnalysisPage() {
                       {result.recommendations.map((rec,i) => (
                         <div key={i} style={{ display:'flex', gap:10, marginBottom:10, padding:'10px 12px', background:'rgba(245,158,11,0.06)', borderRadius:'var(--r-sm)', border:'1px solid rgba(245,158,11,0.18)' }}>
                           <span style={{ color:'var(--clr-warning)', fontWeight:700, fontSize:'0.85rem', flexShrink:0 }}>{i+1}.</span>
-                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>{String(rec).replace(/\$/g, '₹')}</span>
+                          <span style={{ fontSize:'0.85rem', color:'var(--clr-text-secondary)', lineHeight:1.5, wordBreak:'break-word' }}>{String(rec).replace(/\$/g, '₹')}</span>
                         </div>
                       ))}
                     </div>
 
                     {/* ML Model Methodology Card */}
-                    <div className="card" style={{ background:'rgba(99,102,241,0.04)', borderColor:'rgba(99,102,241,0.2)' }}>
+                    <div className="card" style={{ background:'rgba(99,102,241,0.04)', borderColor:'rgba(99,102,241,0.2)', minWidth:0, maxWidth:'100%', overflow:'hidden' }}>
                       <h3 style={{ fontWeight:700, marginBottom:10, display:'flex', alignItems:'center', gap:8, fontSize:'0.92rem', color:'var(--clr-accent-1)' }}>
                         <Brain size={16} /> ML & Mathematical Model Methodology
                       </h3>
                       <p style={{ fontSize:'0.8rem', color:'var(--clr-text-secondary)', lineHeight:1.6, marginBottom:12 }}>
                         This prediction is computed using a <strong>Multi-Factor Weighted Scoring Algorithm & Logarithmic Growth Regression Model</strong> analyzing 6 core metric vectors:
                       </p>
-                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, fontSize:'0.76rem' }}>
-                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6 }}>
+                      <div className="grid-2" style={{ gap:8, fontSize:'0.76rem' }}>
+                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6, minWidth:0, wordBreak:'break-word' }}>
                           <span style={{ fontWeight:700, color:'var(--clr-accent-1)' }}>1. MoM Velocity Bonus:</span> <br/>
-                          <code>min(25, Growth% × 0.9)</code>
+                          <code style={{ wordBreak:'break-all', display:'inline-block' }}>min(25, Growth% × 0.9)</code>
                         </div>
-                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6 }}>
+                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6, minWidth:0, wordBreak:'break-word' }}>
                           <span style={{ fontWeight:700, color:'var(--clr-accent-1)' }}>2. Founder Domain Weight:</span> <br/>
-                          <code>min(15, Exp_Yrs × 1.6)</code>
+                          <code style={{ wordBreak:'break-all', display:'inline-block' }}>min(15, Exp_Yrs × 1.6)</code>
                         </div>
-                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6 }}>
+                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6, minWidth:0, wordBreak:'break-word' }}>
                           <span style={{ fontWeight:700, color:'var(--clr-accent-1)' }}>3. Capital Efficiency Factor:</span> <br/>
-                          <code>MRR &gt; Burn ? +15 : -12</code>
+                          <code style={{ wordBreak:'break-all', display:'inline-block' }}>MRR &gt; Burn ? +15 : -12</code>
                         </div>
-                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6 }}>
+                        <div style={{ padding:'8px 10px', background:'rgba(255,255,255,0.03)', borderRadius:6, minWidth:0, wordBreak:'break-word' }}>
                           <span style={{ fontWeight:700, color:'var(--clr-accent-1)' }}>4. User Scale Log-Curve:</span> <br/>
-                          <code>min(15, Log10(Users) × 3.5)</code>
+                          <code style={{ wordBreak:'break-all', display:'inline-block' }}>min(15, Log10(Users) × 3.5)</code>
                         </div>
                       </div>
                     </div>
@@ -330,27 +330,27 @@ export default function AIAnalysisPage() {
         {/* SWOT Tab */}
         {activeTab === 'swot' && (
           <motion.div key="swot" initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-10 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-              <div>
-                <h3 style={{ fontWeight:700 }}>Custom AI SWOT Analysis ({form.industry} • {form.funding_stage})</h3>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:12, marginBottom:20 }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h3 style={{ fontWeight:700, wordBreak: 'break-word' }}>Custom AI SWOT Analysis ({form.industry} • {form.funding_stage})</h3>
                 <p style={{ fontSize:'0.8rem', color:'var(--clr-text-muted)' }}>Dynamically generated based on your metric inputs</p>
               </div>
-              <button className="btn btn-secondary btn-sm" onClick={runPrediction}><RefreshCw size={14}/> Re-analyze</button>
+              <button className="btn btn-secondary btn-sm" onClick={runPrediction} style={{ flexShrink: 0 }}><RefreshCw size={14}/> Re-analyze</button>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+            <div className="grid-2" style={{ gap:16, minWidth:0, maxWidth:'100%' }}>
               {[
                 { key:'strengths', label:'💪 Strengths', color:'#10b981', bg:'rgba(16,185,129,0.08)', border:'rgba(16,185,129,0.2)' },
                 { key:'weaknesses', label:'⚠️ Weaknesses', color:'#ef4444', bg:'rgba(239,68,68,0.08)', border:'rgba(239,68,68,0.2)' },
                 { key:'opportunities', label:'🚀 Opportunities', color:'#6366f1', bg:'rgba(99,102,241,0.08)', border:'rgba(99,102,241,0.2)' },
                 { key:'threats', label:'🔥 Threats', color:'#f59e0b', bg:'rgba(245,158,11,0.08)', border:'rgba(245,158,11,0.2)' },
               ].map(s => (
-                <div key={s.key} className="card" style={{ background:s.bg, borderColor:s.border }}>
+                <div key={s.key} className="card" style={{ background:s.bg, borderColor:s.border, minWidth:0, maxWidth:'100%' }}>
                   <h4 style={{ color:s.color, fontWeight:700, marginBottom:14, fontSize:'0.95rem' }}>{s.label}</h4>
                   <ul style={{ listStyle:'none', display:'flex', flexDirection:'column', gap:10 }}>
                     {(currentSwot[s.key] || []).map((item,i) => (
                       <li key={i} style={{ display:'flex', gap:8, fontSize:'0.84rem', color:'var(--clr-text-secondary)', lineHeight:1.5 }}>
                         <span style={{ color:s.color, fontWeight:700, flexShrink:0 }}>→</span>
-                        {String(item).replace(/\$/g, '₹')}
+                        <span style={{ wordBreak: 'break-word', minWidth: 0 }}>{String(item).replace(/\$/g, '₹')}</span>
                       </li>
                     ))}
                   </ul>
@@ -367,7 +367,7 @@ export default function AIAnalysisPage() {
               <h3 style={{ fontWeight:700 }}>Business Health Metrics</h3>
               <p style={{ fontSize:'0.8rem', color:'var(--clr-text-muted)' }}>Calculated live from your startup's revenue, burn rate, team, and growth metrics</p>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:16 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(min(100%, 280px),1fr))', gap:16, minWidth:0, maxWidth:'100%' }}>
               {currentHealth.map(h => (
                 <div key={h.label} className="card">
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>

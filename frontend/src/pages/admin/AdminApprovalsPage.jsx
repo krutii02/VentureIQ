@@ -140,8 +140,8 @@ export default function AdminApprovalsPage() {
       </div>
 
       {/* ── Main Approvals Card ────────────────────────────────────────── */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div className="card" style={{ minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
           <div>
             <h3 style={{ fontWeight: 700, fontSize: '0.95rem' }}>Pending Verification Queue</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>
@@ -218,7 +218,7 @@ export default function AdminApprovalsPage() {
           </div>
         ) : (
           <div className="table-wrap" style={{ border: 'none' }}>
-            <table>
+            <table style={{ minWidth: 720 }}>
               <thead>
                 <tr>
                   <th>Submission Title</th>

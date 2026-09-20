@@ -688,7 +688,7 @@ export default function InvestorMyProfilePage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: 'var(--clr-bg-card)', borderRadius: 12, padding: 4, border: '1px solid var(--clr-border)', width: 'fit-content' }}>
+      <div className="tab-pill-group">
         {TABS.map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} style={{
             padding: '7px 18px', borderRadius: 9, fontSize: '0.82rem', fontWeight: 600,
@@ -704,7 +704,7 @@ export default function InvestorMyProfilePage() {
       {/* ══════════ OVERVIEW ══════════ */}
       {activeTab === 'overview' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="grid-2" style={{ gap: 20 }}>
 
             <Section title="About Me" icon={User} accent="#6366f1">
               <Field label="Full Name" value={editing ? draft.name : profileData?.name} editing={editing} onChange={setDraftField('name')} placeholder="Your full name" />
@@ -724,7 +724,7 @@ export default function InvestorMyProfilePage() {
           <Section title="Investment Thesis" icon={Target} accent="#8b5cf6">
             <Field label="Thesis Statement" value={editing ? draft.investment_thesis : profileData?.investment_thesis} editing={editing} onChange={setDraftField('investment_thesis')} placeholder="Describe your investment focus..." multiline />
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
+            <div className="grid-2" style={{ gap: 16, marginTop: 8 }}>
               <div>
                 <label style={{ fontSize: '0.72rem', color: 'var(--clr-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 6 }}>Min Ticket</label>
                 {editing
@@ -745,7 +745,7 @@ export default function InvestorMyProfilePage() {
                 <TagSelector label="Focus Industries" options={INDUSTRIES} selected={getDraftTagArray('preferred_industries')} onChange={arr => setDraftTags('preferred_industries', arr)} color="#6366f1" />
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
+              <div className="grid-2" style={{ gap: 16, marginTop: 16 }}>
                 {[
                   { label: 'Investment Stages', items: getTagArray('preferred_stages'), color: '#10b981' },
                   { label: 'Focus Industries', items: getTagArray('preferred_industries'), color: '#6366f1' },
@@ -764,7 +764,7 @@ export default function InvestorMyProfilePage() {
           </Section>
 
           <Section title="Track Record" icon={TrendingUp} accent="#f59e0b">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="grid-2" style={{ gap: 16 }}>
               <div>
                 <Field label="Total Investments" value={editing ? String(draft.total_investments) : String(profileData?.total_investments || 0)} editing={editing} onChange={v => setDraftField('total_investments')(v)} placeholder="12" />
               </div>

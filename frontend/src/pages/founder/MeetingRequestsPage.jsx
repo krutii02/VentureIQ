@@ -647,7 +647,7 @@ export default function MeetingRequestsPage() {
     <DashboardLayout title="Connections" subtitle="Manage incoming investor connections for your startup">
 
       {/* Stats Row */}
-      <div className="grid-4" style={{ marginBottom: 24 }}>
+      <div className="connections-stats-grid">
         {[
           { label: 'Total Requests', value: counts.All, icon: '📬', color: 'rgba(99,102,241,0.15)' },
           { label: 'Pending',        value: counts.Pending,  icon: '⏳', color: 'rgba(245,158,11,0.15)' },
@@ -661,7 +661,7 @@ export default function MeetingRequestsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div style={{ width: 44, height: 44, borderRadius: 'var(--r-md)', background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', marginBottom: 12 }}>{s.icon}</div>
+            <div className="stat-icon-wrapper" style={{ width: 44, height: 44, borderRadius: 'var(--r-md)', background: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', marginBottom: 12 }}>{s.icon}</div>
             <div className="stat-value">{loading ? '—' : s.value}</div>
             <div className="stat-label">{s.label}</div>
           </motion.div>

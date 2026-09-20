@@ -249,7 +249,7 @@ export default function InvestorMatchPage() {
   /* Shared card grid renderer */
   const renderGrid = (list) => (
     <AnimatePresence>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 18 }}>
+      <div className="responsive-card-grid">
         {list.map((inv, i) => (
           <div key={inv.id || i} ref={offset > 0 && i === offset ? firstNewRef : null}>
             <InvestorCard
@@ -285,7 +285,7 @@ export default function InvestorMatchPage() {
         <div className="page-body">
 
           {/* Tab toggle */}
-          <div style={{ display: 'flex', gap: 4, background: 'var(--clr-bg-card)', border: '1px solid var(--clr-border)', borderRadius: 'var(--r-md)', padding: 4, width: 'fit-content', marginBottom: 24 }}>
+          <div className="tab-pill-group">
             {TABS.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}

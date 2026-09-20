@@ -249,7 +249,7 @@ export default function DiscoverPage() {
       {!loadingStartups && (
         <AnimatePresence>
           {view === 'grid' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(310px,1fr))', gap: 18 }}>
+            <div className="responsive-card-grid">
               {filtered.map((s, i) => (
                 <motion.div key={s.id} className="card" layout
                   initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}

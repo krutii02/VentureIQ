@@ -182,7 +182,7 @@ export default function ComparePage() {
       </div>
 
       {/* Side by Side Startup Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+      <div className="grid-2" style={{ marginBottom: 24 }}>
         {[d1, d2].map((d, i) => {
           const isA = i === 0;
           const color = isA ? '#6366f1' : '#10b981';
@@ -256,16 +256,7 @@ export default function ComparePage() {
             return (
               <div
                 key={m.label}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 200px 1fr',
-                  gap: 16,
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  background: 'rgba(255,255,255,0.02)',
-                  borderRadius: 'var(--r-sm)',
-                  border: '1px solid var(--clr-border)',
-                }}
+                className="grid-compare-row"
               >
                 {/* Startup A */}
                 <div style={{ textAlign: 'right', fontWeight: w === 'A' ? 800 : 500, color: w === 'A' ? '#6366f1' : 'var(--clr-text-secondary)', fontSize: '0.9rem' }}>
@@ -273,7 +264,7 @@ export default function ComparePage() {
                 </div>
 
                 {/* Metric Label */}
-                <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--clr-text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <div className="compare-metric-label">
                   {m.label}
                 </div>
 
@@ -288,7 +279,7 @@ export default function ComparePage() {
       </div>
 
       {/* Visual Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div className="grid-2">
         {/* Performance Radar Chart */}
         <div className="card">
           <h3 style={{ fontWeight: 700, marginBottom: 16, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8 }}>

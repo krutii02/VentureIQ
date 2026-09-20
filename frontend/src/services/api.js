@@ -8,12 +8,33 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Attach JWT on every request
+// Attach JWT on protected requests only
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem('ventureiq_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const publicUrls = ['/auth/login/', '/auth/register/', '/auth/google/', '/auth/reset-password/', '/platform-stats/'];
+  const isPublic = publicUrls.some(url => config.url?.includes(url));
+  if (!isPublic) {
+    const token = localStorage.getItem('ventureiq_token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
+
+// Response interceptor: automatically remove invalid/expired token on 401
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      const publicUrls = ['/auth/login/', '/auth/register/', '/auth/google/', '/auth/reset-password/'];
+      const isPublic = publicUrls.some(url => error.config?.url?.includes(url));
+      if (!isPublic) {
+        localStorage.removeItem('ventureiq_token');
+        localStorage.removeItem('ventureiq_refresh');
+        localStorage.removeItem('ventureiq_user');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // API Methods
 export const authAPI = {

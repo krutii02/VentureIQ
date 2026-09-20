@@ -74,7 +74,7 @@ export default function InvestmentToolsPage() {
 
   return (
     <DashboardLayout title="Investment Tools" subtitle="ROI calculators and financial analysis tools">
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="grid-2">
 
         {/* ROI Calculator */}
         <div className="card">

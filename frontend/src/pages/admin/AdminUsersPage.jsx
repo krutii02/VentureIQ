@@ -122,8 +122,8 @@ export default function AdminUsersPage() {
       )}
 
       {/* Main Card */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <div className="card" style={{ minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
           <div>
             <h3 style={{ fontWeight: 700, fontSize: '0.95rem' }}>Platform User Directory</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--clr-text-muted)' }}>
@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
         <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
 
           {/* Search bar with icon */}
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div className="admin-users-search" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', maxWidth: 300 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, color: 'var(--clr-text-muted)', pointerEvents: 'none' }} />
             <input
               type="text"
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
                 color: 'var(--clr-text)',
                 fontSize: '0.78rem',
                 outline: 'none',
-                width: 300,
+                width: '100%',
                 transition: 'border-color 0.2s',
               }}
               onFocus={e => e.target.style.borderColor = 'var(--clr-accent-1)'}
@@ -173,7 +173,7 @@ export default function AdminUsersPage() {
           </div>
 
           {/* Role filter toggles */}
-          <div style={{ display: 'flex', gap: 6, background: 'rgba(255,255,255,0.03)', padding: 4, borderRadius: 'var(--r-md)', border: '1px solid var(--clr-border)' }}>
+          <div className="admin-role-tabs">
             {[
               { id: 'ALL', label: 'All Users', count: users.length },
               { id: 'FOUNDER', label: 'Founders', count: foundersCount },
@@ -184,19 +184,11 @@ export default function AdminUsersPage() {
                 <button
                   key={tab.id}
                   onClick={() => setRoleFilter(tab.id)}
+                  className="role-tab-btn"
                   style={{
-                    padding: '6px 16px',
-                    borderRadius: 'var(--r-sm)',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
                     border: active ? '1px solid rgba(99,102,241,0.4)' : '1px solid transparent',
                     background: active ? 'var(--clr-accent-1)' : 'transparent',
                     color: active ? '#fff' : 'var(--clr-text-muted)',
-                    transition: 'all 0.15s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
                   }}
                 >
                   {tab.label}
@@ -227,8 +219,8 @@ export default function AdminUsersPage() {
             <p style={{ fontSize: '0.82rem' }}>No users match the selected filter</p>
           </div>
         ) : (
-          <div className="table-wrap" style={{ border: 'none', overflow: 'visible' }}>
-            <table>
+          <div className="table-wrap" style={{ border: 'none' }}>
+            <table style={{ minWidth: 720 }}>
               <thead>
                 <tr>
                   <th>User</th>
