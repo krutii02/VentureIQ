@@ -12,6 +12,7 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
   const [loading, setLoading] = useState(false);
   const [err, setErr]         = useState('');
   const overlayRef            = useRef(null);
+  const gsiHandledRef         = useRef(false);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith('your-google')) {
@@ -25,6 +26,7 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
           callback: (response) => {
+            gsiHandledRef.current = true;
             setLoading(false);
             if (response.credential) {
               onCredential(response.credential);
@@ -43,6 +45,11 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
           size: 'large',
           width: width,
         });
+
+        // Mark that GSI handled the click when the overlay is tapped
+        overlayRef.current.addEventListener('click', () => {
+          gsiHandledRef.current = true;
+        }, true);
       } catch (e) {
         console.error('Google GSI overlay error:', e);
       }
@@ -75,17 +82,23 @@ export default function GoogleAuthButton({ onCredential, label = 'Continue with 
   const handleFallbackClick = () => {
     if (disabled || loading) return;
     setErr('');
-    if (!window.google?.accounts?.id) {
-      setErr('Google Sign-In is still loading. Please try again in a moment.');
-      return;
-    }
-    setLoading(true);
-    window.google.accounts.id.prompt((notification) => {
-      setLoading(false);
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        setErr('Google sign-in prompt was suppressed. Please ensure popups and third-party cookies are allowed.');
+    // Reset flag; give the native GSI overlay a moment to handle the click first
+    gsiHandledRef.current = false;
+    setTimeout(() => {
+      // If the native GSI button already opened a popup, don't open another
+      if (gsiHandledRef.current) return;
+      if (!window.google?.accounts?.id) {
+        setErr('Google Sign-In is still loading. Please try again in a moment.');
+        return;
       }
-    });
+      setLoading(true);
+      window.google.accounts.id.prompt((notification) => {
+        setLoading(false);
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          setErr('Google sign-in prompt was suppressed. Please ensure popups and third-party cookies are allowed.');
+        }
+      });
+    }, 300);
   };
 
   return (

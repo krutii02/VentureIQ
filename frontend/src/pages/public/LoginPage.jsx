@@ -222,13 +222,20 @@ export default function LoginPage() {
       .then(r => setStats(r.data))
       .catch(() => { });
   }, []);
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
+    defaultValues: { _e: '', _p: '', name: '', confirmPassword: '' }
+  });
+
+  // Force-clear fields on every mount so no stale values appear
+  useEffect(() => {
+    reset({ _e: '', _p: '', name: '', confirmPassword: '' });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSubmit = async (data) => {
     setAuthErr('');
     try {
-      const email = (data.email || '').trim();
-      const password = (data.password || '').trim();
+      const email = (data._e || '').trim();
+      const password = (data._p || '').trim();
       if (mode === 'login') {
         const user = await login(email, password, selectedRole);
         const userRole = (user?.role || selectedRole).toUpperCase();
@@ -243,7 +250,7 @@ export default function LoginPage() {
         }
         window.location.href = targetRoute;
       } else {
-        if (password !== data.confirmPassword?.trim()) { setAuthErr('Passwords do not match.'); return; }
+        if (password !== (data.confirmPassword || '').trim()) { setAuthErr('Passwords do not match.'); return; }
         const user = await registerUser({ name: data.name?.trim(), email, password, role: selectedRole });
         const userRole = (user?.role || selectedRole).toUpperCase();
         const routes = { FOUNDER: '/founder/startup', INVESTOR: '/investor/my-profile' };
@@ -342,6 +349,9 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 14 }} autoComplete="off">
+                {/* Hidden honeypot fields to prevent browser autofill */}
+                <input type="text" name="prevent_autofill_name" style={{ display: 'none' }} tabIndex={-1} autoComplete="off" />
+                <input type="password" name="prevent_autofill_pw" style={{ display: 'none' }} tabIndex={-1} autoComplete="off" />
                 {mode === 'signup' && (
                   <div className="form-group">
                     <label className="form-label">Full Name</label>
@@ -357,14 +367,14 @@ export default function LoginPage() {
                   <label className="form-label">Email</label>
                   <div className="input-icon-wrap">
                     <Mail size={14} className="input-icon" />
-                    <input type="email" className={`form-input ${errors.email ? 'error' : ''}`} placeholder="you@example.com"
-                      autoComplete="email"
+                    <input type="text" className={`form-input ${errors._e ? 'error' : ''}`} placeholder="you@example.com"
+                      autoComplete="off"
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email' } })} />
+                      {...register('_e', { required: 'Email is required', pattern: { value: /^\S+@\S+\.\S+$/, message: 'Invalid email' } })} />
                   </div>
-                  {errors.email && <span className="form-error">{errors.email.message}</span>}
+                  {errors._e && <span className="form-error">{errors._e.message}</span>}
                 </div>
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -373,17 +383,17 @@ export default function LoginPage() {
                   </div>
                   <div className="input-icon-wrap" style={{ position: 'relative' }}>
                     <Lock size={14} className="input-icon" />
-                    <input type={showPw ? 'text' : 'password'} className={`form-input ${errors.password ? 'error' : ''}`}
-                      placeholder="••••••••" style={{ paddingRight: 40 }} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                    <input type={showPw ? 'text' : 'password'} className={`form-input ${errors._p ? 'error' : ''}`}
+                      placeholder="••••••••" style={{ paddingRight: 40 }} autoComplete="off"
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      {...register('password', { required: 'Password is required', minLength: { value: mode === 'signup' ? 8 : 6, message: `Min ${mode === 'signup' ? 8 : 6} characters` } })} />
+                      {...register('_p', { required: 'Password is required', minLength: { value: mode === 'signup' ? 8 : 6, message: `Min ${mode === 'signup' ? 8 : 6} characters` } })} />
                     <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--clr-text-muted)', cursor: 'pointer', padding: 0, display: 'flex' }}>
                       {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  {errors.password && <span className="form-error">{errors.password.message}</span>}
+                  {errors._p && <span className="form-error">{errors._p.message}</span>}
                 </div>
                 {mode === 'signup' && (
                   <div className="form-group">
@@ -395,7 +405,7 @@ export default function LoginPage() {
                         autoCapitalize="none"
                         autoCorrect="off"
                         spellCheck="false"
-                        {...register('confirmPassword', { required: 'Required', validate: v => v === watch('password') || 'Passwords do not match' })} />
+                        {...register('confirmPassword', { required: 'Required', validate: v => v === watch('_p') || 'Passwords do not match' })} />
                       <button type="button" onClick={() => setShowCPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--clr-text-muted)', cursor: 'pointer', padding: 0, display: 'flex' }}>
                         {showCPw ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>

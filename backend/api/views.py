@@ -363,10 +363,10 @@ class LoginView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Guard: prevent non-admins from claiming admin privileges
-        if role and role.upper() == 'ADMIN' and profile.role.upper() != 'ADMIN':
+        # Guard: selected role must match the user's actual profile role
+        if role and role.upper() != profile.role.upper():
             return Response(
-                {'error': 'Unauthorized: This account does not have Admin privileges.'},
+                {'error': f'This account is registered as {profile.role}. Please select the correct role.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -501,11 +501,22 @@ class GoogleAuthView(APIView):
                     {'error': 'Your account has been locked. Please contact support@ventureiq.com.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-            # For existing users, use their established account role
+            # For existing users, validate that the selected role matches their account
+            if role and role.upper() != profile.role.upper():
+                return Response(
+                    {'error': f'This account is registered as {profile.role}. Please select the correct role.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
             role = profile.role
         else:
             # No existing account found for this Google email.
-            # Seamlessly create a new account with the requested or default role.
+            # In login mode, reject — the user must sign up first.
+            if mode == 'login':
+                return Response(
+                    {'error': 'No account found with this Google email. Please sign up first.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            # In signup mode, create a new account with the requested role.
             if role not in ('FOUNDER', 'INVESTOR'):
                 role = 'FOUNDER'
             is_new_user = True
